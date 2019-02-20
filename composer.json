@@ -21,16 +21,21 @@
             "homepage": "https://github.com/belgattitude"
         }
     ],
+    "bin": [
+        "bin/mediatools-cli.sh",
+        "bin/mediatools-cli.php"
+    ],
     "require": {
         "php": "^7.1",
         "ext-json": "*",
         "ext-pcre": "*",
         "psr/container": "^1.0",
         "psr/log": "^1.0",
-        "symfony/polyfill-mbstring": "^1.9",
+        "scriptfusion/byte-formatter": "^3.2",
+        "soluble/mediatools": "dev-master",
         "symfony/console": "^4.2",
         "symfony/finder": "^4.2",
-        "soluble/mediatools": "dev-master",
+        "symfony/polyfill-mbstring": "^1.9",
         "zendframework/zend-servicemanager": "^3.4"
     },
     "require-dev" : {

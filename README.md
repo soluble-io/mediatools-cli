@@ -12,7 +12,7 @@
 Console
 
 ```
-$ php bin/console.php scan:videos --dir ./test
+$ php bin/mediatools-cli scan:videos --dir ./test
 ```
 
  

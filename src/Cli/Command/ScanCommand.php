@@ -12,6 +12,8 @@ use Soluble\MediaTools\Video\VideoInfoReaderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Helper\TableStyle;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -86,28 +88,32 @@ class ScanCommand extends Command
 
         $sizeFormatter = new ByteFormatter();
 
-        $rows = [];
+        $rows      = [];
+        $warnings  = [];
+        $totalSize = 0;
 
         /** @var \SplFileInfo $video */
         foreach ($videos as $video) {
             $videoFile = $video->getPathname();
             try {
-                $info    = $this->reader->getInfo($videoFile);
-                $vStream = $info->getVideoStreams()->getFirst();
-                $pixFmt  = $vStream->getPixFmt();
-                $bitRate = $vStream->getBitRate();
-                $row     = [
-                    $video->getBasename(),
-                    SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1)),
+                $info     = $this->reader->getInfo($videoFile);
+                $vStream  = $info->getVideoStreams()->getFirst();
+                $pixFmt   = $vStream->getPixFmt();
+                $bitRate  = $vStream->getBitRate();
+                $fileSize = (int) filesize($videoFile);
+                $row      = [
+                    $video,
+                    preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
                     $vStream->getCodecName(),
                     sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
                     ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
-                    $sizeFormatter->format((int) filesize($videoFile)),
+                    $sizeFormatter->format($fileSize),
                     $pixFmt,
                 ];
                 $rows[] = $row;
+                $totalSize += $fileSize;
             } catch (InfoReaderExceptionInterface $e) {
-                // $output->writeln('Failed');
+                $warnings[] = [$videoFile];
             }
 
             $progressBar->advance();
@@ -132,12 +138,43 @@ class ScanCommand extends Command
             'pix_fmt',
         ]);
 
-        $table->setRows($rows ?? []);
+        $previousPath = null;
+        $first        = true;
+
+        foreach ($rows as $row) {
+            /** @var \SplFileInfo $file */
+            $file   = $row[0];
+            $row[0] = $file->getBasename();
+            if ($previousPath !== $file->getPath()) {
+                if (!$first) {
+                    $table->addRow(new TableSeparator(['colspan' => count($row)]));
+                }
+                //$table->addRow([new TableCell(sprintf('<fg=yellow>%s</>', $file->getPath()), ['colspan' => count($row)])]);
+                $table->addRow([new TableCell(sprintf('<fg=yellow>%s</>', $file->getPath()))]);
+                $table->addRow(new TableSeparator(['colspan' => count($row)]));
+                $previousPath = $file->getPath();
+            }
+            $table->addRow($row);
+            $first = false;
+        }
         foreach ($colIndexes = [1, 2, 3, 4, 5, 6] as $idx) {
             $table->setColumnStyle($idx, $rightAlignstyle);
         }
+        $table->addRow(new TableSeparator());
+        $table->addRow(['<fg=cyan>Total</>', '', '', '', '', sprintf('<fg=cyan>%s</>', $sizeFormatter->format($totalSize))]);
 
         $table->render();
+
+        // display warnings
+        if (count($warnings) > 0) {
+            $table = new Table($output);
+            $table->setHeaders([
+                'Unsupported files'
+            ]);
+            $table->setStyle('box');
+            $table->setRows($warnings);
+            $table->render();
+        }
 
         $output->writeln("\nFinished");
 
