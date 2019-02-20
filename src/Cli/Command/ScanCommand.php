@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Soluble\MediaTools\Cli\Command;
 
+use ScriptFUSION\Byte\ByteFormatter;
+use ScriptFUSION\Byte\Unit\SymbolDecorator;
 use Soluble\MediaTools\Video\Exception\InfoReaderExceptionInterface;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
@@ -74,11 +76,15 @@ class ScanCommand extends Command
         $output->writeln(sprintf('Scanning %s', $videoPath));
 
         // Get the videos in path
-
         $videos = $this->getVideoFiles($videoPath);
 
         $progressBar = new ProgressBar($output, count($videos));
         $progressBar->start();
+
+        $bitRateFormatter = new ByteFormatter();
+        //$bitRateFormatter->setUnitDecorator(new SymbolDecorator(SymbolDecorator::SUFFIX_NONE));
+
+        $sizeFormatter = new ByteFormatter();
 
         $rows = [];
 
@@ -89,14 +95,15 @@ class ScanCommand extends Command
                 $info    = $this->reader->getInfo($videoFile);
                 $vStream = $info->getVideoStreams()->getFirst();
                 $pixFmt  = $vStream->getPixFmt();
+                $bitRate = $vStream->getBitRate();
                 $row     = [
                     $video->getBasename(),
-                    sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
                     SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1)),
-                    $vStream->getBitRate(),
                     $vStream->getCodecName(),
+                    sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
+                    ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
+                    $sizeFormatter->format((int) filesize($videoFile)),
                     $pixFmt,
-                    filesize($videoFile),
                 ];
                 $rows[] = $row;
             } catch (InfoReaderExceptionInterface $e) {
@@ -117,12 +124,12 @@ class ScanCommand extends Command
         $table->setStyle('box');
         $table->setHeaders([
             'file',
-            'size',
             'duration',
-            'bitrate',
             'codec',
-            'fmt',
+            'size',
+            'bitrate',
             'filesize',
+            'pix_fmt',
         ]);
 
         $table->setRows($rows ?? []);
