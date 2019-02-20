@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Soluble\MediaTools\Cli\Command;
 
 use Soluble\MediaTools\Video\Exception\InfoReaderExceptionInterface;
+use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableStyle;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -69,7 +71,7 @@ class ScanCommand extends Command
             ));
         }
 
-        $output->writeln('Hello');
+        $output->writeln(sprintf('Scanning %s', $videoPath));
 
         // Get the videos in path
 
@@ -83,24 +85,23 @@ class ScanCommand extends Command
         /** @var \SplFileInfo $video */
         foreach ($videos as $video) {
             $videoFile = $video->getPathname();
-
             try {
                 $info    = $this->reader->getInfo($videoFile);
                 $vStream = $info->getVideoStreams()->getFirst();
-
                 $pixFmt = $vStream->getPixFmt();
-
-                $rows[] = [
+                $row = [
                     $video->getBasename(),
                     sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
-                    $info->getDuration(),
+                    SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1)),
                     $vStream->getBitRate(),
                     $vStream->getCodecName(),
                     $pixFmt,
                     filesize($videoFile),
                 ];
+                $rows[] = $row;
+
             } catch (InfoReaderExceptionInterface $e) {
-                $output->writeln('Failed');
+               // $output->writeln('Failed');
             }
 
             $progressBar->advance();
@@ -109,6 +110,13 @@ class ScanCommand extends Command
         $output->writeln('');
 
         $table = new Table($output);
+
+        $rightAlignstyle = new TableStyle();
+        $rightAlignstyle->setPadType(STR_PAD_LEFT);
+
+
+        //$table->setStyle($tableStyle);
+        $table->setStyle('box');
         $table->setHeaders([
             'file',
             'size',
@@ -118,12 +126,22 @@ class ScanCommand extends Command
             'fmt',
             'filesize',
         ]);
+
         $table->setRows($rows ?? []);
+        foreach($colIndexes=[1, 2,3,4,5,6] as $idx) {
+            $table->setColumnStyle($idx, $rightAlignstyle);
+        }
+
         $table->render();
 
         $output->writeln("\nFinished");
 
         return 1;
+    }
+
+
+    private function outputTable(array $rows): void {
+
     }
 
     /**
