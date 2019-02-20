@@ -1,0 +1,50 @@
+language: php
+
+cache:
+    directories:
+        - vendor
+        - $HOME/.composer/cache
+        - .travis/downloads
+        - .travis/ffmpeg-release-64bit-static
+
+before_install:
+  - |
+    if [ "x$REMOVE_QA" = "xyes" ]; then
+      composer remove vimeo/psalm infection/infection friendsofphp/php-cs-fixer phpstan/phpstan-webmozart-assert phpstan/phpstan phpstan/phpstan-phpunit phpstan/phpstan-strict-rules jangregor/phpstan-prophecy --dev --no-interaction;
+    fi
+  - |
+    if [ "x$XDEBUG" != "xyes" ]; then
+      mv ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini{,.disabled} || true
+    fi
+  - |
+    if [ "x$INSTALL_FFMPEG" == "xyes" ]; then
+      .travis/travis-install-ffmpeg.sh
+    fi
+
+install:
+  - |
+    if [[ $DEPS == 'lowest' ]]; then
+      travis_retry composer -n update --prefer-dist --prefer-lowest --prefer-stable --no-interaction $COMPOSER_ARGS;
+    else
+      travis_retry composer -n update --prefer-dist --no-interaction $COMPOSER_ARGS;
+    fi
+jobs:
+  allow_failures:
+    - php: nightly
+
+  include:
+    - stage: Tests and Coverage (PHP 7.2)
+      php: 7.2
+      env: XDEBUG=yes INSTALL_FFMPEG=yes REMOVE_QA=yes
+      script:
+        - ./vendor/bin/phpunit -v -c .travis/phpunit.xml --coverage-clover=coverage.xml
+        - wget https://scrutinizer-ci.com/ocular.phar
+        - php ocular.phar code-coverage:upload --format=php-clover coverage.xml
+        - bash <(curl -s https://codecov.io/bash)
+    - stage: PHPStan and Code style
+      php: 7.2
+      env: XDEBUG=yes INSTALL_FFMPEG=yes REMOVE_QA=no
+      script:
+        - composer phpstan
+        - composer cs-check
+

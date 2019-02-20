@@ -1,0 +1,51 @@
+includes:
+	- vendor/phpstan/phpstan-webmozart-assert/extension.neon
+	- vendor/jangregor/phpstan-prophecy/src/extension.neon
+	- vendor/phpstan/phpstan-strict-rules/rules.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon
+	- vendor/phpstan/phpstan-phpunit/rules.neon
+parameters:
+	fileExtensions:
+		- php
+		- dist
+	reportUnmatchedIgnoredErrors: false
+	ignoreErrors:
+		# for covariance allowed failures
+		-
+			message: '#Return type(.*)RuntimeException(.*)of method(.*)should be covariant#'
+			path: src/Common/Exception/ProcessException.php
+		-
+			message: '#Instanceof between(.*)VideoFilterInterface and (.*)VideoFilterInterface will(.*)evaluate to true.#'
+			path: src/Video/Filter/VideoFilterChain.php
+		-
+			message: '#Call to function is_array\(\) with array will always evaluate to true.#'
+			path: src/Video/Info/VideoStreamCollection.php
+		-
+			message: '#Call to function is_array\(\) with array will always evaluate to true.#'
+			path: src/Video/Info/AudioStreamCollection.php
+
+
+		# For convenience when faking assertions
+
+		- '#Call to static method PHPUnit\\Framework\\Assert::assertTrue\(\) with true will always evaluate to true.#'
+		- '#Call to static method PHPUnit\\Framework\\Assert::assertFalse\(\) with true#'
+		- '#Call to static method PHPUnit\\Framework\\Assert::assertInstanceOf(.*)will always evaluate to true#'
+
+		# For allowing tests to attempt to break things
+
+		-
+			message: '#Parameter \#2 \$outputFile of method#'
+			path: tests/unit/Video/VideoConverterTest.php
+		-
+			message: '#Parameter \#1 \$filters of method#'
+			path: tests/unit/Video/Filter/VideoFilterChainTest.php
+		-
+			message: '#Parameter \#3 \$outputFile of method#'
+			path: tests/unit/Video/Adapter/FFMpegAdapterTest.php
+		-
+			message: '#Parameter(.*)of class(.*)expects array#'
+			path: tests/unit/Video/Info/VideoStreamCollectionTest.php
+		-
+			message: '#Parameter(.*)of class(.*)expects array#'
+			path: tests/unit/Video/Info/AudioStreamCollectionTest.php
+

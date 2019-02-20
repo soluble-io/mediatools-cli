@@ -1,0 +1,101 @@
+{
+    "name": "soluble/mediatools-cli",
+    "description": "CLI for FFMpeg video conversion, thumbnail, query and more !",
+    "license": "MIT",
+    "keywords": [
+        "video",
+        "transcode",
+        "ffmpeg",
+        "ffprobe",
+        "thumbnail",
+        "conversion",
+        "cli",
+        "console",
+        "soluble-mediatools"
+    ],
+    "homepage": "https://github.com/soluble-io/soluble-mediatools-cli",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Sébastien Vanvelthem",
+            "homepage": "https://github.com/belgattitude"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "ext-json": "*",
+        "ext-pcre": "*",
+        "psr/container": "^1.0",
+        "psr/log": "^1.0",
+        "symfony/polyfill-mbstring": "^1.9",
+        "symfony/console": "^4.0",
+        "soluble/mediatools": "dev-master"
+    },
+    "require-dev" : {
+        "captainhook/plugin-composer": "^4.0",
+        "consistence/coding-standard": "^3.8",
+        "fig/http-message-util": "^1.1.2",
+        "friendsofphp/php-cs-fixer": "^2.14",
+        "infection/infection": "^0.12",
+        "jangregor/phpstan-prophecy": "^0.3",
+        "mikey179/vfsstream": "^1.6",
+        "monolog/monolog": "^1.23",
+        "phpspec/prophecy": "^1.8",
+        "phpstan/phpstan": "^0.11",
+        "phpstan/phpstan-phpunit": "^0.11",
+        "phpstan/phpstan-strict-rules": "^0.11",
+        "phpstan/phpstan-webmozart-assert": "^0.11.0",
+        "phpunit/phpunit": "^7.4",
+        "psr/http-message": "^1.0.1",
+        "roave/security-advisories": "dev-master",
+        "slevomat/coding-standard": "^5.0",
+        "squizlabs/php_codesniffer": "^3.4",
+        "vimeo/psalm": "^3.0",
+        "zendframework/zend-servicemanager": "^3.3"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Soluble\\MediaTools\\Cli\\": "src/Cli/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MediaToolsCliTest\\": "tests/unit",
+            "MediaToolsCliTest\\Util\\": "tests/util",
+            "MediaToolsCliTest\\Functional\\": "tests/functional"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@phpstan",
+            "@psalm",
+            "@test:unit"
+        ],
+        "fix": [
+            "@cs-fix"
+        ],
+        "test": "vendor/bin/phpunit",
+        "test:unit": "vendor/bin/phpunit --testsuite=unit",
+        "test:mutation": "vendor/bin/infection --configuration=infection.json --test-framework=phpunit --test-framework-options='--testsuite=unit' --min-msi=40 --min-covered-msi=60 --threads=4",
+        "cs-check": "vendor/bin/php-cs-fixer --diff --dry-run -v fix",
+        "cs-fix": "vendor/bin/php-cs-fixer -v fix",
+        "cs-lint-fix": "vendor/bin/phpcbf; vendor/bin/php-cs-fixer -v fix",
+        "phpstan": "vendor/bin/phpstan analyse -l 7 -c phpstan.neon src tests",
+        "psalm": "vendor/bin/psalm --show-info=false",
+        "doc:install": "pip install -r requirements.txt --upgrade",
+        "doc:build": "mkdocs build",
+        "doc:serve": "mkdocs serve --dev-addr localhost:8094",
+        "doc:deploy": "mkdocs gh-deploy"
+    },
+    "suggest": {
+        "monolog/monolog": "PSR-3 compatible logger"
+    },
+    "archive": {
+        "exclude": [".travis", "infection.json", ".sami.php", "phpstan.neon", "tests", "docs", ".travis", ".travis.yml", ".codeclimate.yml", ".coveralls.yml", ".scrutinizer.yml", ".php_cs", ".gitignore", "phpcs.xml"]
+    }
+}

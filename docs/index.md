@@ -10,5 +10,5 @@ Wraps around [ffmpeg](https://www.ffmpeg.org/) and [ffprobe](https://www.ffmpeg.
 and exposes most of their features, like scaling, clipping, filters, transcoding, audio extraction 
 and much more.    
 
-![Logo](./docs/assets/images/mediatools.png)
+![Logo](./assets/images/mediatools.png)
  

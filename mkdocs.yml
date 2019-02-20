@@ -1,0 +1,75 @@
+site_name: 'mediatools-cli'
+site_description: 'soluble-mediatools-cli documentation'
+site_author: 'Sébastien Vanvelthem'
+site_url: https://soluble-io.github.io/soluble-mediatools
+
+# Repository
+repo_name: 'soluble-mediatools-cli'
+repo_url: 'https://github.com/soluble-io/soluble-mediatools-cli'
+
+# Copyright
+copyright: 'Copyright &copy; 2018-2019 Sébastien Vanvelthem'
+
+strict: true
+
+docs_dir: docs
+site_dir: build/docs
+
+nav:
+    - Home: index.md
+    - License: 'about/license.md'
+
+theme:
+  name: 'material'
+  language: 'en'
+  palette:
+    primary: 'white'
+    accent: 'orange'
+  font:
+    text: 'Lato'
+    code: 'Roboto Mono'
+  logo:
+    icon: 'play_circle_outline'
+  feature:
+    tabs: false
+
+# Customization
+extra:
+  social:
+    - type: 'github'
+      link: 'https://github.com/soluble-io/soluble-mediatools-cli'
+
+extra_css:
+  - 'assets/css/extra.css'
+  - 'assets/css/monokai.css'
+
+#google_analytics:
+  #- ''
+  #- 'auto'
+
+
+# Extensions
+markdown_extensions:
+  - markdown.extensions.admonition
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem
+#      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist
+  - pymdownx.tilde
