@@ -37,9 +37,9 @@ class ConfigProvider
             [
                 'factories'  => [
                     ConvertCommand::class => ConvertCommandFactory::class,
-                    ScanCommand::class    => ScanCommandFactory::class
-            ],
-        ]
+                    ScanCommand::class    => ScanCommandFactory::class,
+                ],
+            ]
         );
     }
 }

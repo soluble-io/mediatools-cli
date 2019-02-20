@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Soluble\MediaTools\Cli\Command;
 
 use ScriptFUSION\Byte\ByteFormatter;
-use ScriptFUSION\Byte\Unit\SymbolDecorator;
 use Soluble\MediaTools\Video\Exception\InfoReaderExceptionInterface;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
@@ -23,9 +22,7 @@ use Symfony\Component\Finder\Finder;
 
 class ScanCommand extends Command
 {
-    /**
-     * @var VideoInfoReaderInterface
-     */
+    /** @var VideoInfoReaderInterface */
     private $reader;
 
     /** @var string[] */
@@ -169,7 +166,7 @@ class ScanCommand extends Command
         if (count($warnings) > 0) {
             $table = new Table($output);
             $table->setHeaders([
-                'Unsupported files'
+                'Unsupported files',
             ]);
             $table->setStyle('box');
             $table->setRows($warnings);

@@ -6,7 +6,6 @@ namespace MediaToolsCliTest\Functional\Command;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Tester\CommandTester;
 
 class ScanCommandTest extends TestCase
 {
@@ -24,10 +23,10 @@ class ScanCommandTest extends TestCase
                 $tester->execute([
                     'config-file' => PjbServerTestConfig::getBaseDir() . '/config/pjbserver.config.php.dist'
                 ]);
-        
+
                 self::assertEquals(0, $tester->getStatusCode());
-        
-        
+
+
                 if (!file_exists($pid_file)) {
                     self::assertRegexp("/Server already stopped \(pid_file (.*) not found\)./", $tester->getDisplay());
                 } else {
