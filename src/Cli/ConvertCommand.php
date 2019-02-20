@@ -222,9 +222,9 @@ class ConvertCommand extends Command
 
         /** @var \SplFileInfo $file */
         foreach ($files as $file) {
-            // original files ust not be converted, an mkv have been
+            // original files must not be converted, an mkv have been
             // provided
-            if (!preg_match('/\.original\./', $file->getPathname())) {
+            if (preg_match('/\.original\./', $file->getPathname()) === 1) {
                 $videos[] = $file;
             }
         }
@@ -307,16 +307,6 @@ class ConvertCommand extends Command
 
     public function convertVP9Multipass(string $input, string $output, VideoConvertParamsInterface $extraParams): void
     {
-        /**
-         * /opt/ffmpeg/ffmpeg -i '/web/material-for-the-spine/latest_sources/goldberg.mov' -vf yadif,hqdn3d -b:v 1024k \
-         * -minrate 512k -maxrate 1485k -tile-columns 2 -g 240 -threads 8 \
-         * -quality good -crf 32 -c:v libvpx-vp9 -an \
-         * -pass 1 -passlogfile /tmp/ffmpeg-passlog-goldberg.log -speed 4 -f webm -y /dev/null && \
-         * /opt/ffmpeg/ffmpeg -i '/web/material-for-the-spine/latest_sources/goldberg.mov' -vf yadif,hqdn3d -b:v 1024k \
-         * -minrate 512k -maxrate 1485k -tile-columns 2 -g 240 -threads 8 \
-         * -quality good -crf 32 -auto-alt-ref 1 -lag-in-frames 25 -c:v libvpx-vp9 -c:a libopus \
-         * -pass 2 -passlogfile /tmp/ffmpeg-passlog-goldberg.log -speed 2 -y /tmp/goldberg.multipass.new.webm.
-         */
         $logFile = tempnam(sys_get_temp_dir(), 'ffmpeg-log');
 
         $firstPassParams = (new VideoConvertParams())
@@ -349,7 +339,7 @@ class ConvertCommand extends Command
             //die();
             $pass1Process->mustRun();
         } catch (\Throwable $e) {
-            if ($logFile && file_exists($logFile)) {
+            if (is_string($logFile) && file_exists($logFile)) {
                 unlink($logFile);
             }
             throw $e;
