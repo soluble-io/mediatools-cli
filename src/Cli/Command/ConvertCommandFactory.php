@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Soluble\MediaTools\Cli;
+namespace Soluble\MediaTools\Cli\Command;
 
 use Psr\Container\ContainerInterface;
 use Soluble\MediaTools\Video\VideoAnalyzerInterface;

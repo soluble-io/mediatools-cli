@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Soluble\MediaTools\Cli;
+namespace Soluble\MediaTools\Cli\Command;
 
 use Soluble\MediaTools\Common\IO\PlatformNullFile;
 use Soluble\MediaTools\Video\Filter\Hqdn3DVideoFilter;
@@ -24,26 +24,22 @@ use Symfony\Component\Finder\Finder;
 
 class ConvertCommand extends Command
 {
-    /**
-     * @var VideoInfoReaderInterface
-     */
+    /** @var VideoInfoReaderInterface */
     protected $videoInfoReader;
 
-    /**
-     * @var VideoAnalyzerInterface
-     */
+    /** @var VideoAnalyzerInterface */
     protected $videoAnalyzer;
 
-    /**
-     * @var VideoConverterInterface
-     */
+    /** @var VideoConverterInterface */
     protected $videoConverter;
 
-    /**
-     * @var string[]
-     */
+    /** @var string[] */
     protected $supportedVideoExtensions = [
-        'mov', 'mp4', 'mkv', 'flv', 'webm'
+        'mov',
+        'mp4',
+        'mkv',
+        'flv',
+        'webm',
     ];
 
     public function __construct(VideoInfoReaderInterface $videoInfoReader, VideoAnalyzerInterface $videoAnalyzer, VideoConverterInterface $videoConverter)
@@ -132,7 +128,7 @@ class ConvertCommand extends Command
                 $vStream->getCodecName(),
                 $pixFmt,
                 $interlaceMode,
-                filesize($videoFile)
+                filesize($videoFile),
             ];
 
             $extraParams = new VideoConvertParams();
@@ -143,12 +139,12 @@ class ConvertCommand extends Command
                 $extraParams = $extraParams->withVideoFilter(
                     new VideoFilterChain([
                         new YadifVideoFilter(),
-                        new Hqdn3DVideoFilter()
+                        new Hqdn3DVideoFilter(),
                     ])
                 );
             } else {
                 new VideoFilterChain([
-                    new Hqdn3DVideoFilter()
+                    new Hqdn3DVideoFilter(),
                 ]);
             }
 
@@ -194,7 +190,14 @@ class ConvertCommand extends Command
 
         $table = new Table($output);
         $table->setHeaders([
-            'file', 'size', 'duration', 'bitrate', 'codec', 'fmt', 'interlace', 'filesize'
+            'file',
+            'size',
+            'duration',
+            'bitrate',
+            'codec',
+            'fmt',
+            'interlace',
+            'filesize',
         ]);
         $table->setRows($rows ?? []);
         $table->render();
@@ -224,9 +227,11 @@ class ConvertCommand extends Command
         foreach ($files as $file) {
             // original files must not be converted, an mkv have been
             // provided
-            if (preg_match('/\.original\./', $file->getPathname()) === 1) {
-                $videos[] = $file;
+            if (preg_match('/\.original\./', $file->getPathname()) !== 1) {
+                continue;
             }
+
+            $videos[] = $file;
         }
 
         return $videos;
@@ -326,7 +331,7 @@ class ConvertCommand extends Command
             ->withOutputFormat('webm')
             ->withSpeed(4)
             ->withPass(1)
-            ->withPassLogFile($logFile ?: '/tmp/ffmpeg-log');
+            ->withPassLogFile(is_string($logFile) ? $logFile : '/tmp/ffmpeg-log');
 
         try {
             $pass1Process = $this->videoConverter->getSymfonyProcess(
@@ -346,13 +351,13 @@ class ConvertCommand extends Command
         }
 
         $secondPassParams = $firstPassParams
-                                ->withConvertParams($extraParams)
-                                ->withSpeed(2)
-                                ->withPass(2)
-                                ->withAudioCodec('libopus')
-                                ->withAudioBitrate('128k')
-                                ->withAutoAltRef(1)
-                                ->withLagInFrames(25);
+            ->withConvertParams($extraParams)
+            ->withSpeed(2)
+            ->withPass(2)
+            ->withAudioCodec('libopus')
+            ->withAudioBitrate('128k')
+            ->withAutoAltRef(1)
+            ->withLagInFrames(25);
 
         $tmpOutput = $output . '.tmp';
 
