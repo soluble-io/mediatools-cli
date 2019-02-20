@@ -88,8 +88,8 @@ class ScanCommand extends Command
             try {
                 $info    = $this->reader->getInfo($videoFile);
                 $vStream = $info->getVideoStreams()->getFirst();
-                $pixFmt = $vStream->getPixFmt();
-                $row = [
+                $pixFmt  = $vStream->getPixFmt();
+                $row     = [
                     $video->getBasename(),
                     sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
                     SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1)),
@@ -99,9 +99,8 @@ class ScanCommand extends Command
                     filesize($videoFile),
                 ];
                 $rows[] = $row;
-
             } catch (InfoReaderExceptionInterface $e) {
-               // $output->writeln('Failed');
+                // $output->writeln('Failed');
             }
 
             $progressBar->advance();
@@ -113,7 +112,6 @@ class ScanCommand extends Command
 
         $rightAlignstyle = new TableStyle();
         $rightAlignstyle->setPadType(STR_PAD_LEFT);
-
 
         //$table->setStyle($tableStyle);
         $table->setStyle('box');
@@ -128,7 +126,7 @@ class ScanCommand extends Command
         ]);
 
         $table->setRows($rows ?? []);
-        foreach($colIndexes=[1, 2,3,4,5,6] as $idx) {
+        foreach ($colIndexes = [1, 2, 3, 4, 5, 6] as $idx) {
             $table->setColumnStyle($idx, $rightAlignstyle);
         }
 
@@ -139,9 +137,8 @@ class ScanCommand extends Command
         return 1;
     }
 
-
-    private function outputTable(array $rows): void {
-
+    private function outputTable(array $rows): void
+    {
     }
 
     /**
