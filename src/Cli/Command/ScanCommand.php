@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @see       https://github.com/soluble-io/soluble-mediatools-cli for the canonical repository
+ * @copyright Copyright (c) 2018-2019 Sébastien Vanvelthem. (https://github.com/belgattitude)
+ * @license   https://github.com/soluble-io/soluble-mediatools-cli/blob/master/LICENSE.md MIT
+ */
+
 namespace Soluble\MediaTools\Cli\Command;
 
 use ScriptFUSION\Byte\ByteFormatter;
@@ -56,19 +62,16 @@ class ScanCommand extends Command
             );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$input->hasOption('dir')) {
-            throw new \Exception('Missing dir argument, use <command> <dir>');
+            throw new \InvalidArgumentException('Missing dir argument, use <command> <dir>');
         }
-        $videoPath = $input->hasOption('dir') ? $input->getOption('dir') : '';
+        $videoPath = $input->hasOption('dir') ? $input->getOption('dir') : null;
         if (!is_string($videoPath) || !is_dir($videoPath)) {
-            throw new \Exception(sprintf(
+            throw new \InvalidArgumentException(sprintf(
                 'Video dir %s does not exists',
-                is_string($videoPath) ? $videoPath : ''
+                is_string($videoPath) ? $videoPath : json_encode($videoPath)
             ));
         }
 
@@ -175,7 +178,7 @@ class ScanCommand extends Command
 
         $output->writeln("\nFinished");
 
-        return 1;
+        return 0;
     }
 
     private function outputTable(array $rows): void
@@ -191,6 +194,7 @@ class ScanCommand extends Command
     {
         $files = (new Finder())->files()
             ->in($videoPath)
+            ->ignoreUnreadableDirs()
             ->name(sprintf(
                 '/\.(%s)$/',
                 implode('|', $this->supportedVideoExtensions)

@@ -5,13 +5,6 @@
 
 return [
 
-    'console' => [
-        'commands' => [
-            \Soluble\MediaTools\Cli\Command\ScanCommand::class,
-            \Soluble\MediaTools\Cli\Command\ConvertCommand::class,
-        ],
-    ],
-
     'soluble-mediatools' => [
         /*
         |--------------------------------------------------------------------------

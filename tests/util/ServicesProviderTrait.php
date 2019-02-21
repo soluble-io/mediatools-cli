@@ -3,56 +3,19 @@
 declare(strict_types=1);
 
 /**
- * @see       https://github.com/soluble-io/soluble-mediatools for the canonical repository
- *
+ * @see       https://github.com/soluble-io/soluble-mediatools-cli for the canonical repository
  * @copyright Copyright (c) 2018-2019 Sébastien Vanvelthem. (https://github.com/belgattitude)
- * @license   https://github.com/soluble-io/soluble-mediatools/blob/master/LICENSE.md MIT
+ * @license   https://github.com/soluble-io/soluble-mediatools-cli/blob/master/LICENSE.md MIT
  */
 
 namespace MediaToolsCliTest\Util;
 
 use Psr\Container\ContainerInterface;
-use Soluble\MediaTools\Video\Config\ConfigProvider;
-use Soluble\MediaTools\Video\VideoAnalyzerInterface;
-use Soluble\MediaTools\Video\VideoConverterInterface;
-use Soluble\MediaTools\Video\VideoInfoReaderInterface;
-use Soluble\MediaTools\Video\VideoThumbGeneratorInterface;
+use Soluble\MediaTools\Cli\Config\ConfigProvider;
 use Zend\ServiceManager\ServiceManager;
 
 trait ServicesProviderTrait
 {
-    /**
-     * @throws \Exception
-     */
-    public function getVideoConvertService(): VideoConverterInterface
-    {
-        return $this->getConfiguredContainer()->get(VideoConverterInterface::class);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getVideoInfoService(): VideoInfoReaderInterface
-    {
-        return $this->getConfiguredContainer()->get(VideoInfoReaderInterface::class);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getVideoDetectionService(): VideoAnalyzerInterface
-    {
-        return $this->getConfiguredContainer()->get(VideoAnalyzerInterface::class);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getVideoThumbService(): VideoThumbGeneratorInterface
-    {
-        return $this->getConfiguredContainer()->get(VideoThumbGeneratorInterface::class);
-    }
-
     /**
      * @throws \Exception
      */

@@ -10,6 +10,8 @@ use Soluble\MediaTools\Cli\Config\ConfigProvider;
 
 $config = require(implode(DIRECTORY_SEPARATOR, [$basePath, 'config', 'soluble-mediatools-cli.config.php']));
 
+$configProvider = new ConfigProvider();
+
 // Service manager
 $container = new ServiceManager(
     array_merge([
@@ -19,12 +21,12 @@ $container = new ServiceManager(
             'config' => $config
         ]],
         // Here the factories
-        (new ConfigProvider())->getDependencies()
+        $configProvider->getDependencies()
     ));
 
 $application = new Application('Mediatools console');
 
-$commands = $container->get('config')['console']['commands'];
+$commands = $configProvider->getConsoleCommands();
 foreach ($commands as $command) {
     $application->add($container->get($command));
 }
