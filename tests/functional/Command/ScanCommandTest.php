@@ -11,16 +11,17 @@ declare(strict_types=1);
 
 namespace MediaToolsCliTest\Functional\Command;
 
-use MediaToolsCliTest\Util\ServicesProviderTrait;
+use MediaToolsCliTest\Util\TestConfigProviderTrait;
 use PHPUnit\Framework\TestCase;
 use Soluble\MediaTools\Cli\Command\ScanCommandFactory;
+use Soluble\MediaTools\Cli\Exception\MissingFFProbeBinaryException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class ScanCommandTest extends TestCase
 {
-    use ServicesProviderTrait;
+    use TestConfigProviderTrait;
 
     /** @var Application */
     private $app;
@@ -45,7 +46,7 @@ class ScanCommandTest extends TestCase
         self::assertEquals(0, $tester->getStatusCode());
 
         $tester->execute([
-            '--dir' => dirname(__DIR__, 2) . '/data',
+            '--dir' => $this->getAssetsTestDirectory(),
         ]);
 
         $output = $tester->getDisplay();
@@ -53,6 +54,21 @@ class ScanCommandTest extends TestCase
         self::assertRegExp('/yuv420p/', $output);
 
         self::assertEquals(0, $tester->getStatusCode());
+    }
+
+    public function testMissingFFProbeBinary(): void
+    {
+        self::expectException(MissingFFProbeBinaryException::class);
+        $app     = new Application();
+        $command = (new ScanCommandFactory())($this->getConfiguredContainer(false, './path/ffmpeg', './path/ffprobe'));
+        $app->add($command);
+
+        $command = $app->find('scan:videos');
+
+        $tester = new CommandTester($command);
+        $tester->execute([
+            '--dir' => $this->getAssetsTestDirectory(),
+        ]);
     }
 
     public function testScanDirectoriesThrowsInvalidDirectory(): void

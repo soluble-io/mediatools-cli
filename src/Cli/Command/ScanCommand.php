@@ -12,7 +12,8 @@ declare(strict_types=1);
 namespace Soluble\MediaTools\Cli\Command;
 
 use ScriptFUSION\Byte\ByteFormatter;
-use Soluble\MediaTools\Video\Exception\InfoReaderExceptionInterface;
+use Soluble\MediaTools\Cli\Exception\MissingFFProbeBinaryException;
+use Soluble\MediaTools\Video\Exception as VideoException;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
 use Symfony\Component\Console\Command\Command;
@@ -113,7 +114,9 @@ class ScanCommand extends Command
                 ];
                 $rows[] = $row;
                 $totalSize += $fileSize;
-            } catch (InfoReaderExceptionInterface $e) {
+            } catch (VideoException\MissingFFProbeBinaryException $e) {
+                throw new MissingFFProbeBinaryException('Unable to run ffprobe binary, check your config and ensure it\'s properly installed');
+            } catch (VideoException\InfoReaderExceptionInterface $e) {
                 $warnings[] = [$videoFile];
             }
 

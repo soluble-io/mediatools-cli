@@ -15,12 +15,17 @@ use Psr\Container\ContainerInterface;
 use Soluble\MediaTools\Cli\Config\ConfigProvider;
 use Zend\ServiceManager\ServiceManager;
 
-trait ServicesProviderTrait
+trait TestConfigProviderTrait
 {
+    public function getAssetsTestDirectory(): string
+    {
+        return dirname(__DIR__, 1) . '/data';
+    }
+
     /**
      * @throws \Exception
      */
-    public function getConfiguredContainer(bool $ensureBinariesExists = false): ContainerInterface
+    public function getConfiguredContainer(bool $ensureBinariesExists = false, ?string $ffmpegBinary = null, ?string $ffprobeBinary = null): ContainerInterface
     {
         if (!defined('FFMPEG_BINARY_PATH')) {
             throw new \Exception('Missing phpunit constant FFMPEG_BINARY_PATH');
@@ -29,10 +34,11 @@ trait ServicesProviderTrait
             throw new \Exception('Missing phpunit constant FFPROBE_BINARY_PATH');
         }
 
-        $ffmpegBinary  = FFMPEG_BINARY_PATH;
-        $ffprobeBinary = FFPROBE_BINARY_PATH;
+        $ffmpegBinary  = $ffmpegBinary ?? FFMPEG_BINARY_PATH;
+        $ffprobeBinary = $ffprobeBinary ?? FFPROBE_BINARY_PATH;
+
         if ($ensureBinariesExists) {
-            if (mb_strpos(FFMPEG_BINARY_PATH, './') !== false) {
+            if (mb_strpos($ffmpegBinary, './') !== false) {
                 // relative directory
                 $ffmpegBinary = realpath(FFMPEG_BINARY_PATH);
                 if ($ffmpegBinary === false || !file_exists($ffmpegBinary)) {
@@ -44,7 +50,7 @@ trait ServicesProviderTrait
                 }
             }
 
-            if (mb_strpos(FFPROBE_BINARY_PATH, './') !== false) {
+            if (mb_strpos($ffprobeBinary, './') !== false) {
                 // relative directory
                 $ffprobeBinary = realpath(FFPROBE_BINARY_PATH);
                 if ($ffprobeBinary === false || !file_exists($ffprobeBinary)) {
@@ -64,7 +70,7 @@ trait ServicesProviderTrait
             ],
         ];
 
-        $sm = new ServiceManager(
+        return new ServiceManager(
             array_merge(
                 [
                     'services' => [
@@ -73,7 +79,5 @@ trait ServicesProviderTrait
                 (new ConfigProvider())->getDependencies()
             )
         );
-
-        return $sm;
     }
 }
