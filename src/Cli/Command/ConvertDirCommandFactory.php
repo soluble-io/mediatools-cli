@@ -16,11 +16,11 @@ use Soluble\MediaTools\Video\VideoAnalyzerInterface;
 use Soluble\MediaTools\Video\VideoConverterInterface;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
 
-class ConvertCommandFactory
+class ConvertDirCommandFactory
 {
-    public function __invoke(ContainerInterface $container): ConvertCommand
+    public function __invoke(ContainerInterface $container): ConvertDirCommand
     {
-        return new ConvertCommand(
+        return new ConvertDirCommand(
             $container->get(VideoInfoReaderInterface::class),
             $container->get(VideoAnalyzerInterface::class),
             $container->get(VideoConverterInterface::class)

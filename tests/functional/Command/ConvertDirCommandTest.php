@@ -13,13 +13,12 @@ namespace MediaToolsCliTest\Functional\Command;
 
 use MediaToolsCliTest\Util\TestConfigProviderTrait;
 use PHPUnit\Framework\TestCase;
-use Soluble\MediaTools\Cli\Command\ScanCommandFactory;
-use Soluble\MediaTools\Cli\Exception\MissingFFProbeBinaryException;
+use Soluble\MediaTools\Cli\Command\ConvertDirCommandFactory;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class ScanCommandTest extends TestCase
+class ConvertDirCommandTest extends TestCase
 {
     use TestConfigProviderTrait;
 
@@ -32,8 +31,8 @@ class ScanCommandTest extends TestCase
     protected function setUp(): void
     {
         $this->app = new Application();
-        $this->app->add((new ScanCommandFactory())($this->getConfiguredContainer()));
-        $this->command = $this->app->find('scan:videos');
+        $this->app->add((new ConvertDirCommandFactory())($this->getConfiguredContainer()));
+        $this->command = $this->app->find('convert:directory');
     }
 
     public function testScanDirectories(): void
@@ -49,26 +48,7 @@ class ScanCommandTest extends TestCase
             '--dir' => $this->getAssetsTestDirectory(),
         ]);
 
-        $output = $tester->getDisplay();
-        self::assertRegExp('/big_buck_bunny_low.m4v/', $output);
-        self::assertRegExp('/yuv420p/', $output);
-
         self::assertEquals(0, $tester->getStatusCode());
-    }
-
-    public function testMissingFFProbeBinary(): void
-    {
-        self::expectException(MissingFFProbeBinaryException::class);
-        $app     = new Application();
-        $command = (new ScanCommandFactory())($this->getConfiguredContainer(false, './path/ffmpeg', './path/ffprobe'));
-        $app->add($command);
-
-        $command = $app->find('scan:videos');
-
-        $tester = new CommandTester($command);
-        $tester->execute([
-            '--dir' => $this->getAssetsTestDirectory(),
-        ]);
     }
 
     public function testScanDirectoriesThrowsInvalidDirectory(): void

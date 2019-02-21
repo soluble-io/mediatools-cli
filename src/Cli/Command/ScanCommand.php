@@ -177,10 +177,10 @@ class ScanCommand extends Command
 
         foreach ($rows as $row) {
             /** @var \SplFileInfo $file */
-            $file   = $row[0];
+            $file     = $row[0];
             $fileName = $file->getBasename();
-            $fileName = strlen($fileName) > 30 ? substr($file->getBasename(),0,30)."[...].".$file->getExtension() : $fileName;
-            $row[0] = $fileName;
+            $fileName = mb_strlen($fileName) > 30 ? mb_substr($file->getBasename(), 0, 30) . '[...].' . $file->getExtension() : $fileName;
+            $row[0]   = $fileName;
             if ($previousPath !== $file->getPath()) {
                 if (!$first) {
                     $table->addRow(new TableSeparator(['colspan' => count($row)]));

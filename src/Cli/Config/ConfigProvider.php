@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace Soluble\MediaTools\Cli\Config;
 
-use Soluble\MediaTools\Cli\Command\ConvertCommand;
-use Soluble\MediaTools\Cli\Command\ConvertCommandFactory;
+use Soluble\MediaTools\Cli\Command\ConvertDirCommand;
+use Soluble\MediaTools\Cli\Command\ConvertDirCommandFactory;
 use Soluble\MediaTools\Cli\Command\ScanCommand;
 use Soluble\MediaTools\Cli\Command\ScanCommandFactory;
 use Soluble\MediaTools\Video\Config\ConfigProvider as VideoConfigProvider;
@@ -43,8 +43,8 @@ class ConfigProvider
             (new VideoConfigProvider())->getDependencies(),
             [
                 'factories'  => [
-                    ConvertCommand::class => ConvertCommandFactory::class,
-                    ScanCommand::class    => ScanCommandFactory::class,
+                    ConvertDirCommand::class => ConvertDirCommandFactory::class,
+                    ScanCommand::class       => ScanCommandFactory::class,
                 ],
             ]
         );
@@ -59,7 +59,7 @@ class ConfigProvider
     {
         return [
             \Soluble\MediaTools\Cli\Command\ScanCommand::class,
-            \Soluble\MediaTools\Cli\Command\ConvertCommand::class,
+            \Soluble\MediaTools\Cli\Command\ConvertDirCommand::class,
         ];
     }
 }

@@ -34,6 +34,4 @@ class ConfigProviderTest extends TestCase
             self::assertArrayHasKey($command, $deps);
         }
     }
-
-
 }
