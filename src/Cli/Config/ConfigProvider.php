@@ -15,6 +15,10 @@ use Soluble\MediaTools\Cli\Command\ConvertDirCommand;
 use Soluble\MediaTools\Cli\Command\ConvertDirCommandFactory;
 use Soluble\MediaTools\Cli\Command\ScanCommand;
 use Soluble\MediaTools\Cli\Command\ScanCommandFactory;
+use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
+use Soluble\MediaTools\Preset\MP4\StreamableH264PresetFactory;
+use Soluble\MediaTools\Preset\WebM\GoogleVod2019Preset;
+use Soluble\MediaTools\Preset\WebM\GoogleVod2019PresetFactory;
 use Soluble\MediaTools\Video\Config\ConfigProvider as VideoConfigProvider;
 
 class ConfigProvider
@@ -45,6 +49,10 @@ class ConfigProvider
                 'factories'  => [
                     ConvertDirCommand::class => ConvertDirCommandFactory::class,
                     ScanCommand::class       => ScanCommandFactory::class,
+
+                    // Presets
+                    GoogleVod2019Preset::class  => GoogleVod2019PresetFactory::class,
+                    StreamableH264Preset::class => StreamableH264PresetFactory::class,
                 ],
             ]
         );

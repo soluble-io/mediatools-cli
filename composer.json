@@ -65,7 +65,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Soluble\\MediaTools\\Cli\\": "src/Cli/"
+            "Soluble\\MediaTools\\Cli\\": "src/Cli/",
+            "Soluble\\MediaTools\\Preset\\": "src/Preset/"
         }
     },
     "autoload-dev": {

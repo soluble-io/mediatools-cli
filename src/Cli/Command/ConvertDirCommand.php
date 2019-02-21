@@ -12,6 +12,8 @@ declare(strict_types=1);
 namespace Soluble\MediaTools\Cli\Command;
 
 use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
+use Soluble\MediaTools\Common\Exception\ProcessException;
+use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
 use Soluble\MediaTools\Video\VideoAnalyzerInterface;
 use Soluble\MediaTools\Video\VideoConverterInterface;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
@@ -37,6 +39,8 @@ class ConvertDirCommand extends Command
     protected $supportedVideoExtensions = [
         'mov',
         'mp4',
+        'm4v',
+        'avi',
         'mkv',
         'flv',
         'webm',
@@ -86,11 +90,20 @@ class ConvertDirCommand extends Command
         $output->writeln('* Reading metadata...');
 
         $progressBar = new ProgressBar($output, count($files));
-        $progressBar->start();
+        //$progressBar->start();
 
-        /* @var \SplFileInfo $video */
+        $preset = new StreamableH264Preset($this->videoInfoReader, $this->videoConverter, $this->videoAnalyzer);
+
+        /** @var \SplFileInfo $file */
         foreach ($files as $file) {
-            $progressBar->advance();
+            try {
+                $preset->convert($file->getPathname());
+                $output->writeln(sprintf('<fg=green>- Converted:</> %s.', $file));
+            } catch (ProcessException $e) {
+                $output->writeln(sprintf('<fg=red>- Skipped:</> %s : Not a valid media file.', $file));
+            }
+
+            //$progressBar->advance();
         }
 
         $progressBar->finish();
