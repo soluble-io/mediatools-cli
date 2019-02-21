@@ -13,10 +13,24 @@ namespace MediaToolsCliTest\Util;
 
 use Psr\Container\ContainerInterface;
 use Soluble\MediaTools\Cli\Config\ConfigProvider;
+use Soluble\MediaTools\Video\Config\FFMpegConfigInterface;
+use Soluble\MediaTools\Video\Config\FFProbeConfigInterface;
 use Zend\ServiceManager\ServiceManager;
 
 trait TestConfigProviderTrait
 {
+
+    public function getFFMpegConfig(?string $ffmpegBinary = null): FFMpegConfigInterface
+    {
+        return $this->getConfiguredContainer(false, $ffmpegBinary)->get(FFMpegConfigInterface::class);
+    }
+
+    public function getFFProbeConfig(?string $ffprobeBinary = null): FFProbeConfigInterface
+    {
+        return $this->getConfiguredContainer(false, null, $ffprobeBinary)->get(FFProbeConfigInterface::class);
+    }
+
+
     public function getAssetsTestDirectory(): string
     {
         return dirname(__DIR__, 1) . '/data';
