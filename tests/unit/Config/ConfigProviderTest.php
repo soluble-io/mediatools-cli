@@ -25,7 +25,15 @@ class ConfigProviderTest extends TestCase
         $configProvider = new ConfigProvider();
         $config         = $configProvider->__invoke();
         self::assertArrayHasKey('dependencies', $config);
-
         self::assertSame($config['dependencies'], $configProvider->getDependencies());
+
+        $deps = $configProvider->getDependencies()['factories'];
+
+        $commands = $configProvider->getConsoleCommands();
+        foreach ($commands as $command) {
+            self::assertArrayHasKey($command, $deps);
+        }
     }
+
+
 }

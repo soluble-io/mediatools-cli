@@ -79,4 +79,13 @@ class ScanCommandTest extends TestCase
             '--dir' => './unexistent/directory',
         ]);
     }
+
+    public function testScanDirectoriesThrowsInvalidDirectory2(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        $tester = new CommandTester($this->command);
+        $tester->execute([
+
+        ]);
+    }
 }

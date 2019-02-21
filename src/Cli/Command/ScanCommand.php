@@ -100,13 +100,14 @@ class ScanCommand extends Command
             try {
                 $info     = $this->reader->getInfo($videoFile);
                 $vStream  = $info->getVideoStreams()->getFirst();
+                $aStream  = $info->getAudioStreams()->getFirst();
                 $pixFmt   = $vStream->getPixFmt();
                 $bitRate  = $vStream->getBitRate();
                 $fileSize = (int) filesize($videoFile);
                 $row      = [
                     $video,
                     preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
-                    $vStream->getCodecName(),
+                    sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
                     sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
                     ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
                     $sizeFormatter->format($fileSize),
@@ -177,7 +178,9 @@ class ScanCommand extends Command
         foreach ($rows as $row) {
             /** @var \SplFileInfo $file */
             $file   = $row[0];
-            $row[0] = $file->getBasename();
+            $fileName = $file->getBasename();
+            $fileName = strlen($fileName) > 30 ? substr($file->getBasename(),0,30)."[...].".$file->getExtension() : $fileName;
+            $row[0] = $fileName;
             if ($previousPath !== $file->getPath()) {
                 if (!$first) {
                     $table->addRow(new TableSeparator(['colspan' => count($row)]));
