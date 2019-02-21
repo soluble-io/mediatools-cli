@@ -13,6 +13,7 @@ namespace Soluble\MediaTools\Cli\Command;
 
 use ScriptFUSION\Byte\ByteFormatter;
 use Soluble\MediaTools\Cli\Exception\MissingFFProbeBinaryException;
+use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
 use Soluble\MediaTools\Video\Exception as VideoException;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
@@ -26,7 +27,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Finder\Finder;
 
 class ScanCommand extends Command
 {
@@ -80,7 +80,7 @@ class ScanCommand extends Command
         $output->writeln(sprintf('* Scanning %s for files...', $videoPath));
 
         // Get the videos in path
-        $videos = $this->getVideoFiles($videoPath);
+        $videos = (new DirectoryScanner())->findFiles($videoPath, $this->supportedVideoExtensions);
 
         $output->writeln('* Reading metadata...');
 
@@ -88,7 +88,7 @@ class ScanCommand extends Command
         $progressBar->start();
 
         $bitRateFormatter = new ByteFormatter();
-        $sizeFormatter = new ByteFormatter();
+        $sizeFormatter    = new ByteFormatter();
 
         $rows      = [];
         $warnings  = [];
@@ -141,12 +141,12 @@ class ScanCommand extends Command
             $table->render();
         }
 
-        $output->writeln("");
+        $output->writeln('');
 
         return 0;
     }
 
-    private function renderResultsTable(OutputInterface $output, array $rows, int $totalSize, array $columns=[]): void
+    private function renderResultsTable(OutputInterface $output, array $rows, int $totalSize, array $columns = []): void
     {
         $sizeFormatter = new ByteFormatter();
 
@@ -194,31 +194,5 @@ class ScanCommand extends Command
         $table->addRow(['<fg=cyan>Total</>', '', '', '', '', sprintf('<fg=cyan>%s</>', $sizeFormatter->format($totalSize))]);
 
         $table->render();
-
-    }
-
-    /**
-     * @param string $videoPath
-     *
-     * @return array<\SplFileInfo>
-     */
-    public function getVideoFiles(string $videoPath): array
-    {
-        $files = (new Finder())->files()
-            ->in($videoPath)
-            ->ignoreUnreadableDirs()
-            ->name(sprintf(
-                '/\.(%s)$/',
-                implode('|', $this->supportedVideoExtensions)
-            ));
-
-        $videos = [];
-
-        /** @var \SplFileInfo $file */
-        foreach ($files as $file) {
-            $videos[] = $file;
-        }
-
-        return $videos;
     }
 }

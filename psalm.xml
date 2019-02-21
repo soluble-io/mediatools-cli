@@ -21,8 +21,6 @@
         <RedundantConditionGivenDocblockType errorLevel="info" />
         <PossiblyNullArgument>
             <errorLevel type="suppress">
-                <file name="src/Video/VideoConverter.php" />
-                <file name="src/Video/VideoThumbGenerator.php" />
             </errorLevel>
         </PossiblyNullArgument>
 
