@@ -77,17 +77,17 @@ class ScanCommand extends Command
             ));
         }
 
-        $output->writeln(sprintf('Scanning %s', $videoPath));
+        $output->writeln(sprintf('* Scanning %s for files...', $videoPath));
 
         // Get the videos in path
         $videos = $this->getVideoFiles($videoPath);
+
+        $output->writeln('* Reading metadata...');
 
         $progressBar = new ProgressBar($output, count($videos));
         $progressBar->start();
 
         $bitRateFormatter = new ByteFormatter();
-        //$bitRateFormatter->setUnitDecorator(new SymbolDecorator(SymbolDecorator::SUFFIX_NONE));
-
         $sizeFormatter = new ByteFormatter();
 
         $rows      = [];
@@ -122,8 +122,33 @@ class ScanCommand extends Command
 
             $progressBar->advance();
         }
+        $progressBar->finish();
 
         $output->writeln('');
+        $output->writeln('* Available media files:');
+
+        $this->renderResultsTable($output, $rows, $totalSize);
+
+        // display warnings
+        if (count($warnings) > 0) {
+            $output->writeln('* The following files were not detected as valid medias:');
+            $table = new Table($output);
+            $table->setHeaders([
+                'Unsupported files',
+            ]);
+            $table->setStyle('box-double');
+            $table->setRows($warnings);
+            $table->render();
+        }
+
+        $output->writeln("");
+
+        return 0;
+    }
+
+    private function renderResultsTable(OutputInterface $output, array $rows, int $totalSize, array $columns=[]): void
+    {
+        $sizeFormatter = new ByteFormatter();
 
         $table = new Table($output);
 
@@ -142,6 +167,10 @@ class ScanCommand extends Command
             'pix_fmt',
         ]);
 
+        foreach ($colIndexes = [1, 2, 3, 4, 5, 6] as $idx) {
+            $table->setColumnStyle($idx, $rightAlignstyle);
+        }
+
         $previousPath = null;
         $first        = true;
 
@@ -153,40 +182,19 @@ class ScanCommand extends Command
                 if (!$first) {
                     $table->addRow(new TableSeparator(['colspan' => count($row)]));
                 }
-                //$table->addRow([new TableCell(sprintf('<fg=yellow>%s</>', $file->getPath()), ['colspan' => count($row)])]);
-                $table->addRow([new TableCell(sprintf('<fg=yellow>%s</>', $file->getPath()))]);
+                $table->addRow([new TableCell(sprintf('<fg=yellow>%s</>', $file->getPath()), ['colspan' => count($row)])]);
                 $table->addRow(new TableSeparator(['colspan' => count($row)]));
                 $previousPath = $file->getPath();
             }
             $table->addRow($row);
             $first = false;
         }
-        foreach ($colIndexes = [1, 2, 3, 4, 5, 6] as $idx) {
-            $table->setColumnStyle($idx, $rightAlignstyle);
-        }
+
         $table->addRow(new TableSeparator());
         $table->addRow(['<fg=cyan>Total</>', '', '', '', '', sprintf('<fg=cyan>%s</>', $sizeFormatter->format($totalSize))]);
 
         $table->render();
 
-        // display warnings
-        if (count($warnings) > 0) {
-            $table = new Table($output);
-            $table->setHeaders([
-                'Unsupported files',
-            ]);
-            $table->setStyle('box');
-            $table->setRows($warnings);
-            $table->render();
-        }
-
-        $output->writeln("\nFinished");
-
-        return 0;
-    }
-
-    private function outputTable(array $rows): void
-    {
     }
 
     /**

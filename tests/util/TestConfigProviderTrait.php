@@ -19,7 +19,6 @@ use Zend\ServiceManager\ServiceManager;
 
 trait TestConfigProviderTrait
 {
-
     public function getFFMpegConfig(?string $ffmpegBinary = null): FFMpegConfigInterface
     {
         return $this->getConfiguredContainer(false, $ffmpegBinary)->get(FFMpegConfigInterface::class);
@@ -29,7 +28,6 @@ trait TestConfigProviderTrait
     {
         return $this->getConfiguredContainer(false, null, $ffprobeBinary)->get(FFProbeConfigInterface::class);
     }
-
 
     public function getAssetsTestDirectory(): string
     {
