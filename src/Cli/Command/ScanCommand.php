@@ -103,13 +103,27 @@ class ScanCommand extends Command
                 $aStream  = $info->getAudioStreams()->getFirst();
                 $pixFmt   = $vStream->getPixFmt();
                 $bitRate  = $vStream->getBitRate();
-                $fileSize = (int) filesize($videoFile);
-                $row      = [
+                $fileSize = $video->getSize();
+
+                $fps             = $vStream->getRFrameRate() ?? '';
+                [$frames, $base] = explode('/', $fps);
+
+                $fps2 = number_format($frames / $base, 3, '.', '');
+
+                try {
+                    $fps3 = number_format($vStream->getNbFrames() ?? 0 / $vStream->getDuration() ?? 1, 3, '.', '');
+                } catch (\Throwable $e) {
+                    $fps3 = '?';
+                }
+                //$fps2 = $vStream->getNbFrames() > 0 ? $vStream->getNbFrames() / $vStream->getDurationTs() : null;
+
+                $row = [
                     $video,
                     preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
                     sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
                     sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
                     ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
+                    $fps . ' - ' . $fps2 . ' - ' . $fps3,
                     $sizeFormatter->format($fileSize),
                     $pixFmt,
                 ];
@@ -164,6 +178,7 @@ class ScanCommand extends Command
             'codec',
             'size',
             'bitrate',
+            'fps',
             'filesize',
             'pix_fmt',
         ]);

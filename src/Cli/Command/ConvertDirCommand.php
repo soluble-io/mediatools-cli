@@ -12,11 +12,9 @@ declare(strict_types=1);
 namespace Soluble\MediaTools\Cli\Command;
 
 use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
+use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
 use Soluble\MediaTools\Common\Exception\ProcessException;
 use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
-use Soluble\MediaTools\Video\VideoAnalyzerInterface;
-use Soluble\MediaTools\Video\VideoConverterInterface;
-use Soluble\MediaTools\Video\VideoInfoReaderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -26,14 +24,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ConvertDirCommand extends Command
 {
-    /** @var VideoInfoReaderInterface */
-    protected $videoInfoReader;
-
-    /** @var VideoAnalyzerInterface */
-    protected $videoAnalyzer;
-
-    /** @var VideoConverterInterface */
-    protected $videoConverter;
+    /** @var MediaToolsServiceInterface */
+    private $mediaTools;
 
     /** @var string[] */
     protected $supportedVideoExtensions = [
@@ -46,11 +38,9 @@ class ConvertDirCommand extends Command
         'webm',
     ];
 
-    public function __construct(VideoInfoReaderInterface $videoInfoReader, VideoAnalyzerInterface $videoAnalyzer, VideoConverterInterface $videoConverter)
+    public function __construct(MediaToolsServiceInterface $mediaTools)
     {
-        $this->videoInfoReader = $videoInfoReader;
-        $this->videoAnalyzer   = $videoAnalyzer;
-        $this->videoConverter  = $videoConverter;
+        $this->mediaTools = $mediaTools;
         parent::__construct();
     }
 
@@ -92,12 +82,15 @@ class ConvertDirCommand extends Command
         $progressBar = new ProgressBar($output, count($files));
         //$progressBar->start();
 
-        $preset = new StreamableH264Preset($this->videoInfoReader, $this->videoConverter, $this->videoAnalyzer);
+        $preset = new StreamableH264Preset($this->mediaTools);
 
         /** @var \SplFileInfo $file */
         foreach ($files as $file) {
             try {
-                $preset->convert($file->getPathname());
+                //$preset->convert($file->getPathname());
+                $params = $preset->getParams($file->getPathname());
+                var_dump($params->toArray());
+
                 $output->writeln(sprintf('<fg=green>- Converted:</> %s.', $file));
             } catch (ProcessException $e) {
                 $output->writeln(sprintf('<fg=red>- Skipped:</> %s : Not a valid media file.', $file));

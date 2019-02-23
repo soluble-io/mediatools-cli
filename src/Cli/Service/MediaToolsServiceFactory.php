@@ -9,20 +9,22 @@ declare(strict_types=1);
  * @license   https://github.com/soluble-io/soluble-mediatools-cli/blob/master/LICENSE.md MIT
  */
 
-namespace Soluble\MediaTools\Preset\MP4;
+namespace Soluble\MediaTools\Cli\Service;
 
 use Psr\Container\ContainerInterface;
 use Soluble\MediaTools\Video\VideoAnalyzerInterface;
 use Soluble\MediaTools\Video\VideoConverterInterface;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
+use Soluble\MediaTools\Video\VideoThumbGeneratorInterface;
 
-class StreamableH264PresetFactory
+class MediaToolsServiceFactory
 {
-    public function __invoke(ContainerInterface $container): StreamableH264Preset
+    public function __invoke(ContainerInterface $container): MediaToolsService
     {
-        return new StreamableH264Preset(
+        return new MediaToolsService(
             $container->get(VideoInfoReaderInterface::class),
             $container->get(VideoConverterInterface::class),
+            $container->get(VideoThumbGeneratorInterface::class),
             $container->get(VideoAnalyzerInterface::class)
         );
     }
