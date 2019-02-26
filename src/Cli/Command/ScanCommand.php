@@ -105,27 +105,21 @@ class ScanCommand extends Command
                 $bitRate  = $vStream->getBitRate();
                 $fileSize = $video->getSize();
 
-                $fps             = $vStream->getRFrameRate() ?? '';
-                [$frames, $base] = explode('/', $fps);
-
-                $fps2 = number_format($frames / $base, 3, '.', '');
-
-                try {
-                    $fps3 = number_format($vStream->getNbFrames() ?? 0 / $vStream->getDuration() ?? 1, 3, '.', '');
-                } catch (\Throwable $e) {
-                    $fps3 = '?';
-                }
-                //$fps2 = $vStream->getNbFrames() > 0 ? $vStream->getNbFrames() / $vStream->getDurationTs() : null;
+                $fps = (string) ($vStream->getFps(0) ?? '');
 
                 $row = [
-                    $video,
-                    preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
-                    sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
-                    sprintf('%sx%s', $vStream->getWidth(), $vStream->getHeight()),
-                    ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
-                    $fps . ' - ' . $fps2 . ' - ' . $fps3,
-                    $sizeFormatter->format($fileSize),
-                    $pixFmt,
+                    'video'      => $video,
+                    'duration'   => preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
+                    'codec'      => sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
+                    'resolution' => sprintf(
+                        '%sx%s%s',
+                        $vStream->getWidth(),
+                        $vStream->getHeight(),
+                        $fps !== '' ? " <fg=yellow>${fps}fps</>" : ''
+                    ),
+                    'bitrate' => ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
+                    'size'    => $sizeFormatter->format($fileSize),
+                    'pixFmt'  => $pixFmt,
                 ];
                 $rows[] = $row;
                 $totalSize += $fileSize;
@@ -178,24 +172,23 @@ class ScanCommand extends Command
             'codec',
             'size',
             'bitrate',
-            'fps',
             'filesize',
             'pix_fmt',
         ]);
 
-        foreach ($colIndexes = [1, 2, 3, 4, 5, 6] as $idx) {
+        foreach ($colIndexes = [1, 2, 3, 4, 5] as $idx) {
             $table->setColumnStyle($idx, $rightAlignstyle);
         }
 
         $previousPath = null;
         $first        = true;
 
-        foreach ($rows as $row) {
+        foreach ($rows as $idx => $row) {
             /** @var \SplFileInfo $file */
-            $file     = $row[0];
-            $fileName = $file->getBasename();
-            $fileName = mb_strlen($fileName) > 30 ? mb_substr($file->getBasename(), 0, 30) . '[...].' . $file->getExtension() : $fileName;
-            $row[0]   = $fileName;
+            $file         = $row['video'];
+            $fileName     = $file->getBasename();
+            $fileName     = mb_strlen($fileName) > 30 ? mb_substr($file->getBasename(), 0, 30) . '[...].' . $file->getExtension() : $fileName;
+            $row['video'] = $fileName;
             if ($previousPath !== $file->getPath()) {
                 if (!$first) {
                     $table->addRow(new TableSeparator(['colspan' => count($row)]));
