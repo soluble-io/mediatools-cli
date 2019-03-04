@@ -39,5 +39,22 @@ return [
         'ffprobe.timeout'       => null,       // <null>: no timeout, <number>: number of seconds before timing-out
         'ffprobe.idle_timeout'  => null,       // <null>: no idle timeout, <number>: number of seconds of inactivity before timing-out
         'ffprobe.env'           => [],         // An array of additional env vars to set when running the ffprobe
+
+        'cache' => (function() {
+            return new \Symfony\Component\Cache\Simple\FilesystemCache(
+                'soluble-mediatools-cli',
+                86400 * 30,
+                \Soluble\MediaTools\Cli\Config\ConfigProvider::getProjectCacheDirectory()
+            );
+        })(),
+
+        'logger' => (function() {
+            return new \Symfony\Component\Cache\Simple\FilesystemCache(
+                'soluble-mediatools-cli',
+                86400 * 30,
+                \Soluble\MediaTools\Cli\Config\ConfigProvider::getProjectCacheDirectory()
+            );
+        })(),
+
     ],
 ];

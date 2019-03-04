@@ -76,4 +76,53 @@ class ConfigProvider
             \Soluble\MediaTools\Cli\Command\ConvertDirCommand::class,
         ];
     }
+
+    /**
+     * @throws \RuntimeException
+     */
+    public static function getProjectBaseDirectory(): string
+    {
+        $baseDir = dirname(__FILE__, 3);
+        if (!is_dir($baseDir)) {
+            throw new \RuntimeException(sprintf('Cannot get project base directory %s', $baseDir));
+        }
+
+        return $baseDir;
+    }
+
+    /**
+     * @throws \RuntimeException
+     */
+    public static function getProjectCacheDirectory(): string
+    {
+        $cacheDir = self::getProjectBaseDirectory() . implode(DIRECTORY_SEPARATOR, ['data', 'cache']);
+
+        if (!is_dir($cacheDir)) {
+            throw new \RuntimeException(sprintf('Cache directory %s does not exists or invalid.', $cacheDir));
+        }
+
+        if (!is_readable($cacheDir) || !is_writable($cacheDir)) {
+            throw new \RuntimeException(sprintf('Cache directory %s must have read/write access.', $cacheDir));
+        }
+
+        return $cacheDir;
+    }
+
+    /**
+     * @throws \RuntimeException
+     */
+    public static function getProjectLogDirectory(): string
+    {
+        $logDir = self::getProjectBaseDirectory() . implode(DIRECTORY_SEPARATOR, ['data', 'logs']);
+
+        if (!is_dir($logDir)) {
+            throw new \RuntimeException(sprintf('Log directory %s does not exists or invalid.', $logDir));
+        }
+
+        if (!is_readable($logDir) || !is_writable($logDir)) {
+            throw new \RuntimeException(sprintf('Cache directory %s must have read/write access.', $logDir));
+        }
+
+        return $logDir;
+    }
 }
