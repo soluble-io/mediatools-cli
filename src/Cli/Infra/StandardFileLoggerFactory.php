@@ -14,7 +14,6 @@ namespace Soluble\MediaTools\Cli\Infra;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
-
 class StandardFileLoggerFactory
 {
     public function __invoke(ContainerInterface $container): LoggerInterface
@@ -26,6 +25,7 @@ class StandardFileLoggerFactory
                 \Monolog\Logger::INFO
             )
         );
+
         return $logger;
     }
 }
