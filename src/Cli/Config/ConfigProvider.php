@@ -17,11 +17,15 @@ use Soluble\MediaTools\Cli\Command\ScanCommand;
 use Soluble\MediaTools\Cli\Command\ScanCommandFactory;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceFactory;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
+use Soluble\MediaTools\Cli\Infra\StandardFileCacheFactory;
+use Soluble\MediaTools\Cli\Infra\StandardFileLoggerFactory;
 use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
 use Soluble\MediaTools\Preset\MP4\StreamableH264PresetFactory;
 use Soluble\MediaTools\Preset\WebM\GoogleVod2019Preset;
 use Soluble\MediaTools\Preset\WebM\GoogleVod2019PresetFactory;
+use Soluble\MediaTools\Video\Cache\CacheInterface;
 use Soluble\MediaTools\Video\Config\ConfigProvider as VideoConfigProvider;
+use Soluble\MediaTools\Video\Logger\LoggerInterface;
 
 class ConfigProvider
 {
@@ -45,7 +49,7 @@ class ConfigProvider
      */
     public function getDependencies(): array
     {
-        return array_merge_recursive(
+        $arr = array_replace_recursive(
             (new VideoConfigProvider())->getDependencies(),
             [
                 'factories'  => [
@@ -56,12 +60,17 @@ class ConfigProvider
                     ConvertDirCommand::class => ConvertDirCommandFactory::class,
                     ScanCommand::class       => ScanCommandFactory::class,
 
+                    // Infra
+                    LoggerInterface::class      => StandardFileLoggerFactory::class,
+                    CacheInterface::class       => StandardFileCacheFactory::class,
+
                     // Presets
                     GoogleVod2019Preset::class  => GoogleVod2019PresetFactory::class,
                     StreamableH264Preset::class => StreamableH264PresetFactory::class,
                 ],
             ]
         );
+        return $arr;
     }
 
     /**
@@ -82,7 +91,7 @@ class ConfigProvider
      */
     public static function getProjectBaseDirectory(): string
     {
-        $baseDir = dirname(__FILE__, 3);
+        $baseDir = dirname(__FILE__, 4);
         if (!is_dir($baseDir)) {
             throw new \RuntimeException(sprintf('Cannot get project base directory %s', $baseDir));
         }
@@ -95,7 +104,7 @@ class ConfigProvider
      */
     public static function getProjectCacheDirectory(): string
     {
-        $cacheDir = self::getProjectBaseDirectory() . implode(DIRECTORY_SEPARATOR, ['data', 'cache']);
+        $cacheDir = implode(DIRECTORY_SEPARATOR, [self::getProjectBaseDirectory(), 'data', 'cache']);
 
         if (!is_dir($cacheDir)) {
             throw new \RuntimeException(sprintf('Cache directory %s does not exists or invalid.', $cacheDir));
@@ -113,7 +122,7 @@ class ConfigProvider
      */
     public static function getProjectLogDirectory(): string
     {
-        $logDir = self::getProjectBaseDirectory() . implode(DIRECTORY_SEPARATOR, ['data', 'logs']);
+        $logDir = implode(DIRECTORY_SEPARATOR, [self::getProjectBaseDirectory(), 'data', 'logs']);
 
         if (!is_dir($logDir)) {
             throw new \RuntimeException(sprintf('Log directory %s does not exists or invalid.', $logDir));

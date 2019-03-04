@@ -43,18 +43,20 @@ return [
         'cache' => (function() {
             return new \Symfony\Component\Cache\Simple\FilesystemCache(
                 'soluble-mediatools-cli',
-                86400 * 30,
+                86400,
                 \Soluble\MediaTools\Cli\Config\ConfigProvider::getProjectCacheDirectory()
             );
         })(),
 
         'logger' => (function() {
-            return new \Symfony\Component\Cache\Simple\FilesystemCache(
-                'soluble-mediatools-cli',
-                86400 * 30,
-                \Soluble\MediaTools\Cli\Config\ConfigProvider::getProjectCacheDirectory()
+            $logger = new \Monolog\Logger('soluble-mediatools-cli');
+            $logger->pushHandler(
+                new \Monolog\Handler\StreamHandler(
+                    \Soluble\MediaTools\Cli\Config\ConfigProvider::getProjectLogDirectory() . DIRECTORY_SEPARATOR . 'mediatools.log',
+                    \Monolog\Logger::INFO
+                )
             );
+            return $logger;
         })(),
-
     ],
 ];

@@ -12,6 +12,7 @@ composer.lock
 # For PHPUnit
 /build
 /phpunit*.xml
+/data/*
 .phpunit.result.cache
 # For Tests
 /tests/tmp/*
