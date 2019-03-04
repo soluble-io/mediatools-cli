@@ -31,6 +31,7 @@
         "ext-pcre": "*",
         "psr/container": "^1.0",
         "psr/log": "^1.0",
+        "monolog/monolog": "^1.23",
         "scriptfusion/byte-formatter": "^3.2",
         "soluble/mediatools": "dev-master",
         "symfony/console": "^4.2",
@@ -47,7 +48,6 @@
         "infection/infection": "^0.12",
         "jangregor/phpstan-prophecy": "^0.3",
         "mikey179/vfsstream": "^1.6",
-        "monolog/monolog": "^1.23",
         "phpspec/prophecy": "^1.8",
         "phpstan/phpstan": "^0.11",
         "phpstan/phpstan-phpunit": "^0.11",
@@ -99,9 +99,6 @@
         "doc:build": "mkdocs build",
         "doc:serve": "mkdocs serve --dev-addr localhost:8094",
         "doc:deploy": "mkdocs gh-deploy"
-    },
-    "suggest": {
-        "monolog/monolog": "PSR-3 compatible logger"
     },
     "archive": {
         "exclude": [".travis", "infection.json", ".sami.php", "phpstan.neon", "tests", "docs", ".travis", ".travis.yml", ".codeclimate.yml", ".coveralls.yml", ".scrutinizer.yml", ".php_cs", ".gitignore", "phpcs.xml"]
