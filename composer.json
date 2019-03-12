@@ -49,7 +49,7 @@
         "jangregor/phpstan-prophecy": "^0.3",
         "mikey179/vfsstream": "^1.6",
         "phpspec/prophecy": "^1.8",
-        "phpstan/phpstan": "^0.11",
+        "phpstan/phpstan": "^0.11.3",
         "phpstan/phpstan-phpunit": "^0.11",
         "phpstan/phpstan-strict-rules": "^0.11",
         "phpstan/phpstan-webmozart-assert": "^0.11.0",
