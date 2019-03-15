@@ -89,7 +89,7 @@ class ConvertDirCommand extends Command
             try {
                 //$preset->convert($file->getPathname());
                 $params = $preset->getParams($file->getPathname());
-                var_dump($params->toArray());
+                //var_dump($params->toArray());
 
                 $output->writeln(sprintf('<fg=green>- Converted:</> %s.', $file));
             } catch (ProcessException $e) {
