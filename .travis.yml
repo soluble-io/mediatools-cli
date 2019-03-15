@@ -33,18 +33,34 @@ jobs:
     - php: nightly
 
   include:
-    - stage: Tests and Coverage (PHP 7.2)
-      php: 7.2
+    - stage: Tests and Coverage (PHP 7.3)
+      php: 7.3
       env: XDEBUG=yes INSTALL_FFMPEG=yes REMOVE_QA=yes
       script:
         - ./vendor/bin/phpunit -v -c .travis/phpunit.xml --coverage-clover=coverage.xml
         - wget https://scrutinizer-ci.com/ocular.phar
         - php ocular.phar code-coverage:upload --format=php-clover coverage.xml
         - bash <(curl -s https://codecov.io/bash)
-    - stage: PHPStan and Code style
-      php: 7.2
+
+    - stage: PHPStan, Psalm and Code style
+      php: 7.3
       env: XDEBUG=no INSTALL_FFMPEG=no REMOVE_QA=no
       script:
         - composer phpstan
+        - composer psalm
         - composer cs-check
+
+    - stage: Test PHP7.1 with lowest deps
+      php: 7.1
+      env: INSTALL_FFMPEG=yes DEPS=lowest REMOVE_QA=yes
+      script:
+        - composer remove phpunit/phpunit
+        - composer require --dev phpunit/phpunit
+        - ./vendor/bin/phpunit -v -c .travis/phpunit.xml
+
+    - stage: Test PHP Nightly (unit tests only)
+      php: nightly
+      env: COMPOSER_ARGS=--ignore-platform-reqs REMOVE_QA=yes
+      script:
+        - ./vendor/bin/phpunit --testsuite unit -v -c .travis/phpunit.xml
 
