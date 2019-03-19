@@ -30,6 +30,7 @@
             "in": "config"
         }
     ],
+    "compression": "GZ",
     "compactors": [
         "KevinGH\\Box\\Compactor\\Php"
     ],
