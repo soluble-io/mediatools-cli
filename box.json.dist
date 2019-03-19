@@ -1,0 +1,26 @@
+{
+    "output": "build/bin/mediatools.phar",
+    "chmod": "0755",
+    "main": "bin/mediatools-cli.php",
+    "files": [
+        "LICENSE.md"
+    ],
+    "finder": [
+        {
+            "name": ["*.php"],
+            "exclude": ["Tests", "tests"],
+            "in": "vendor"
+        },
+        {
+            "exclude": ["Tests"],
+            "in": "src"
+        },
+        {
+            "in": "bin"
+        },
+        {
+            "in": "config"
+        }
+    ]
+
+}
