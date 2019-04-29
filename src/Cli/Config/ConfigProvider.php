@@ -17,10 +17,14 @@ use Soluble\MediaTools\Cli\Command\ScanCommand;
 use Soluble\MediaTools\Cli\Command\ScanCommandFactory;
 use Soluble\MediaTools\Cli\Infra\StandardFileCacheFactory;
 use Soluble\MediaTools\Cli\Infra\StandardFileLoggerFactory;
+use Soluble\MediaTools\Cli\Media\FileExtensions;
+use Soluble\MediaTools\Cli\Media\FileExtenstionsFactory;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceFactory;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
 use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
 use Soluble\MediaTools\Preset\MP4\StreamableH264PresetFactory;
+use Soluble\MediaTools\Preset\Prod\ResolvePreset;
+use Soluble\MediaTools\Preset\Prod\ResolvePresetFactory;
 use Soluble\MediaTools\Preset\WebM\GoogleVod2019Preset;
 use Soluble\MediaTools\Preset\WebM\GoogleVod2019PresetFactory;
 use Soluble\MediaTools\Video\Cache\CacheInterface;
@@ -64,9 +68,13 @@ class ConfigProvider
                     LoggerInterface::class      => StandardFileLoggerFactory::class,
                     CacheInterface::class       => StandardFileCacheFactory::class,
 
+                    // Media Utils
+                    FileExtensions::class       => FileExtenstionsFactory::class,
+
                     // Presets
                     GoogleVod2019Preset::class  => GoogleVod2019PresetFactory::class,
                     StreamableH264Preset::class => StreamableH264PresetFactory::class,
+                    ResolvePreset::class        => ResolvePresetFactory::class,
                 ],
             ]
         );
