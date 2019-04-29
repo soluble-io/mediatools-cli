@@ -13,13 +13,15 @@ namespace Soluble\MediaTools\Cli\Command;
 
 use Psr\Container\ContainerInterface;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
+use Soluble\MediaTools\Preset\PresetLoader;
 
 class ConvertDirCommandFactory
 {
     public function __invoke(ContainerInterface $container): ConvertDirCommand
     {
         return new ConvertDirCommand(
-            $container->get(MediaToolsServiceInterface::class)
+            $container->get(MediaToolsServiceInterface::class),
+            $container->get(PresetLoader::class)
         );
     }
 }

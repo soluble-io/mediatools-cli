@@ -33,20 +33,7 @@ class GoogleVod2019Preset implements PresetInterface
         return __CLASS__;
     }
 
-    public function convert(string $file, ?int $width = null, ?int $height = null): void
-    {
-        $info = $this->reader->getInfo($file);
-
-        $vStream = $info->getVideoStreams()->getFirst();
-        $aStream = $info->getAudioStreams()->getFirst();
-
-        $width  = $width ?? $vStream->getWidth();
-        $height = $height ?? $vStream->getHeight();
-
-        $params = $this->getParams($width, $height);
-    }
-
-    public function getParams(int $width, int $height): VideoConvertParams
+    public function getParams(string $file, ?int $width = null, ?int $height = null): VideoConvertParams
     {
         $params = (new VideoConvertParams())
             ->withVideoCodec('vp9');

@@ -15,32 +15,37 @@ use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
 use Soluble\MediaTools\Cli\Media\FileExtensions;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
 use Soluble\MediaTools\Common\Exception\ProcessException;
-use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
+use Soluble\MediaTools\Preset\PresetInterface;
+use Soluble\MediaTools\Preset\PresetLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozart\Assert\Assert;
 
 class ConvertDirCommand extends Command
 {
     /** @var MediaToolsServiceInterface */
     private $mediaTools;
 
-    /** @var string[] */
-    protected $supportedVideoExtensions;
+    /**
+     * @var PresetLoader
+     */
+    private $presetLoader;
 
-    public function __construct(MediaToolsServiceInterface $mediaTools)
+    /** @var string[] */
+    private $supportedVideoExtensions;
+
+    public function __construct(MediaToolsServiceInterface $mediaTools, PresetLoader $presetLoader)
     {
         $this->mediaTools               = $mediaTools;
+        $this->presetLoader             = $presetLoader;
         $this->supportedVideoExtensions = (new FileExtensions())->getMediaExtensions();
         parent::__construct();
     }
 
-    /**
-     * Configures the command.
-     */
     protected function configure(): void
     {
         $this
@@ -48,45 +53,61 @@ class ConvertDirCommand extends Command
             ->setDescription('Convert, transcode all media files in a directory')
             ->setDefinition(
                 new InputDefinition([
-                    new InputOption('dir', 'd', InputOption::VALUE_REQUIRED),
-                    new InputOption('preset', 'p', InputOption::VALUE_REQUIRED),
+                    new InputOption('dir', 'd', InputOption::VALUE_REQUIRED, 'Directory to convert'),
+                    new InputOption('preset', 'p', InputOption::VALUE_REQUIRED, 'Conversion preset to use'),
                 ])
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$input->hasOption('dir')) {
-            throw new \InvalidArgumentException('Missing dir argument, use <command> <dir>');
-        }
+        // ########################
+        // Step 1: Check directory
+        // ########################
+
         $directory = $input->getOption('dir');
-        if (!is_string($directory) || !is_dir($directory)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Directory %s does not exists',
-                is_string($directory) ? $directory : json_encode($directory)
-            ));
-        }
+        Assert::stringNotEmpty($directory);
+        Assert::directory($directory);
+
+        // ########################
+        // Step 2: Init preset
+        // ########################
+
+        Assert::stringNotEmpty($input->getOption('preset'));
+        $preset = $this->getPreset($input->getOption('preset'));
+
+        // ########################
+        // Step 3: Scanning dir
+        // ########################
 
         $output->writeln(sprintf('* Scanning %s for media files...', $directory));
 
         // Get the videos in path
-        $files = (new DirectoryScanner())->findFiles($directory, $this->supportedVideoExtensions);
+        $files = (new DirectoryScanner())->findFiles($directory, ['mp4']);
 
         $output->writeln('* Reading metadata...');
 
         $progressBar = new ProgressBar($output, count($files));
         //$progressBar->start();
 
-        $preset = new StreamableH264Preset($this->mediaTools);
+        $converter = $this->mediaTools->getConverter();
 
         /** @var \SplFileInfo $file */
         foreach ($files as $file) {
             try {
-                //$preset->convert($file->getPathname());
                 $params = $preset->getParams($file->getPathname());
-                //var_dump($params->toArray());
 
-                $output->writeln(sprintf('<fg=green>- Converted:</> %s.', $file));
+                $outputFile = sprintf('%s%s', (string) $file, '.mov');
+
+                if (!file_exists($outputFile)) {
+                    $converter->convert((string) $file, $outputFile, $params, function ($stdOut, $stdErr) use ($output) {
+                        $output->write($stdErr);
+                    });
+
+                    $output->writeln(sprintf('<fg=green>- Converted:</> %s.', $file));
+                } else {
+                    $output->writeln(sprintf('<fg=yellow>- Skipped:</> %s : Output file already exists.', $file));
+                }
             } catch (ProcessException $e) {
                 $output->writeln(sprintf('<fg=red>- Skipped:</> %s : Not a valid media file.', $file));
             }
@@ -98,5 +119,10 @@ class ConvertDirCommand extends Command
         $output->writeln('');
 
         return 0;
+    }
+
+    private function getPreset(string $presetName): PresetInterface
+    {
+        return $this->presetLoader->getPreset($presetName);
     }
 }

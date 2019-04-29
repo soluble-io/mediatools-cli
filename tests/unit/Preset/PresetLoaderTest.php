@@ -13,7 +13,7 @@ namespace MediaToolsCliTest\Preset;
 
 use PHPUnit\Framework\TestCase;
 
-class ResolvePresetTest extends TestCase
+class PresetLoaderTest extends TestCase
 {
     public function setUp(): void
     {

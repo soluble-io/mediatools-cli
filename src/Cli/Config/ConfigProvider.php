@@ -22,14 +22,14 @@ use Soluble\MediaTools\Cli\Media\FileExtenstionsFactory;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceFactory;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
 use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
-use Soluble\MediaTools\Preset\MP4\StreamableH264PresetFactory;
+use Soluble\MediaTools\Preset\PresetLoader;
+use Soluble\MediaTools\Preset\PresetLoaderFactory;
 use Soluble\MediaTools\Preset\Prod\ResolvePreset;
-use Soluble\MediaTools\Preset\Prod\ResolvePresetFactory;
 use Soluble\MediaTools\Preset\WebM\GoogleVod2019Preset;
-use Soluble\MediaTools\Preset\WebM\GoogleVod2019PresetFactory;
 use Soluble\MediaTools\Video\Cache\CacheInterface;
 use Soluble\MediaTools\Video\Config\ConfigProvider as VideoConfigProvider;
 use Soluble\MediaTools\Video\Logger\LoggerInterface;
+use Zend\ServiceManager\AbstractFactory\ReflectionBasedAbstractFactory;
 
 class ConfigProvider
 {
@@ -56,9 +56,14 @@ class ConfigProvider
         $arr = array_replace_recursive(
             (new VideoConfigProvider())->getDependencies(),
             [
+                'abstract_factories' => [
+                    ReflectionBasedAbstractFactory::class,
+                ],
+
                 'factories'  => [
                     // Services
                     MediaToolsServiceInterface::class => MediaToolsServiceFactory::class,
+                    PresetLoader::class               => PresetLoaderFactory::class,
 
                     // Commands
                     ConvertDirCommand::class => ConvertDirCommandFactory::class,
@@ -72,9 +77,9 @@ class ConfigProvider
                     FileExtensions::class       => FileExtenstionsFactory::class,
 
                     // Presets
-                    GoogleVod2019Preset::class  => GoogleVod2019PresetFactory::class,
-                    StreamableH264Preset::class => StreamableH264PresetFactory::class,
-                    ResolvePreset::class        => ResolvePresetFactory::class,
+                    GoogleVod2019Preset::class  => ReflectionBasedAbstractFactory::class,
+                    StreamableH264Preset::class => ReflectionBasedAbstractFactory::class,
+                    ResolvePreset::class        => ReflectionBasedAbstractFactory::class,
                 ],
             ]
         );
