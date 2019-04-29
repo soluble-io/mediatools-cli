@@ -19,7 +19,7 @@ class DirectoryScanner
 
         if ($validExtensions !== null && count($validExtensions) > 0) {
             $files->name(sprintf(
-                '/\.(%s)$/',
+                '/\.(%s)$/i',
                 implode('|', $validExtensions)
             ));
         }
