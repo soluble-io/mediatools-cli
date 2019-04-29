@@ -49,6 +49,7 @@ class ConvertDirCommand extends Command
             ->setDefinition(
                 new InputDefinition([
                     new InputOption('dir', 'd', InputOption::VALUE_REQUIRED),
+                    new InputOption('preset', 'p', InputOption::VALUE_REQUIRED),
                 ])
             );
     }
@@ -58,7 +59,7 @@ class ConvertDirCommand extends Command
         if (!$input->hasOption('dir')) {
             throw new \InvalidArgumentException('Missing dir argument, use <command> <dir>');
         }
-        $directory = $input->hasOption('dir') ? $input->getOption('dir') : null;
+        $directory = $input->getOption('dir');
         if (!is_string($directory) || !is_dir($directory)) {
             throw new \InvalidArgumentException(sprintf(
                 'Directory %s does not exists',

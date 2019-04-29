@@ -64,7 +64,7 @@ class ScanCommand extends Command
         if (!$input->hasOption('dir')) {
             throw new \InvalidArgumentException('Missing dir argument, use <command> <dir>');
         }
-        $videoPath = $input->hasOption('dir') ? $input->getOption('dir') : null;
+        $videoPath = $input->getOption('dir');
         if (!is_string($videoPath) || !is_dir($videoPath)) {
             throw new \InvalidArgumentException(sprintf(
                 'Video dir %s does not exists',
