@@ -28,6 +28,11 @@ class GoogleVod2019Preset implements PresetInterface
         $this->analyzer  = $analyzer;
     }
 
+    public function getName(): string
+    {
+        return __CLASS__;
+    }
+
     public function convert(string $file, ?int $width = null, ?int $height = null): void
     {
         $info = $this->reader->getInfo($file);

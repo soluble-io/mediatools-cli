@@ -6,4 +6,5 @@ namespace Soluble\MediaTools\Preset;
 
 interface PresetInterface
 {
+    public function getName(): string;
 }

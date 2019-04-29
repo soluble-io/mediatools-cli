@@ -24,6 +24,11 @@ class StreamableH264Preset implements PresetInterface
         $this->mediaTools = $mediaTools;
     }
 
+    public function getName(): string
+    {
+        return __CLASS__;
+    }
+
     private function getVideoInfo(string $file): VideoInfoInterface
     {
         if ($this->videoInfo === null) {
