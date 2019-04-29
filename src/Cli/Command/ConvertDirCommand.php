@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Soluble\MediaTools\Cli\Command;
 
 use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
+use Soluble\MediaTools\Cli\Media\FileExtensions;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
 use Soluble\MediaTools\Common\Exception\ProcessException;
 use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
@@ -28,19 +29,12 @@ class ConvertDirCommand extends Command
     private $mediaTools;
 
     /** @var string[] */
-    protected $supportedVideoExtensions = [
-        'mov',
-        'mp4',
-        'm4v',
-        'avi',
-        'mkv',
-        'flv',
-        'webm',
-    ];
+    protected $supportedVideoExtensions;
 
     public function __construct(MediaToolsServiceInterface $mediaTools)
     {
-        $this->mediaTools = $mediaTools;
+        $this->mediaTools               = $mediaTools;
+        $this->supportedVideoExtensions = (new FileExtensions())->getMediaExtensions();
         parent::__construct();
     }
 

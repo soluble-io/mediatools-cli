@@ -14,6 +14,7 @@ namespace Soluble\MediaTools\Cli\Command;
 use ScriptFUSION\Byte\ByteFormatter;
 use Soluble\MediaTools\Cli\Exception\MissingFFProbeBinaryException;
 use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
+use Soluble\MediaTools\Cli\Media\FileExtensions;
 use Soluble\MediaTools\Video\Exception as VideoException;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
@@ -34,18 +35,12 @@ class ScanCommand extends Command
     private $reader;
 
     /** @var string[] */
-    private $supportedVideoExtensions = [
-        'mov',
-        'mp4',
-        'm4v',
-        'mkv',
-        'flv',
-        'webm',
-    ];
+    private $supportedVideoExtensions;
 
     public function __construct(VideoInfoReaderInterface $videoInfoReader)
     {
-        $this->reader = $videoInfoReader;
+        $this->reader                   = $videoInfoReader;
+        $this->supportedVideoExtensions = (new FileExtensions())->getMediaExtensions();
         parent::__construct();
     }
 
