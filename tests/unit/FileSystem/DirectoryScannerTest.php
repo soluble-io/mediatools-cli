@@ -29,9 +29,7 @@ class DirectoryScannerTest extends TestCase
         $files = $ds->findFiles(__DIR__);
         self::assertGreaterThan(0, count($files));
 
-
         $files = $ds->findFiles(__DIR__, ['PHP']);
         self::assertGreaterThan(0, count($files));
-
     }
 }
