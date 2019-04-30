@@ -104,8 +104,8 @@ class ConfigProvider
     public function getConsoleCommands(): array
     {
         return [
-            \Soluble\MediaTools\Cli\Command\ScanCommand::class,
-            \Soluble\MediaTools\Cli\Command\ConvertDirCommand::class,
+            ScanCommand::class,
+            ConvertDirCommand::class,
         ];
     }
 

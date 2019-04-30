@@ -98,7 +98,9 @@
         "doc:install": "pip install -r requirements.txt --upgrade",
         "doc:build": "mkdocs build",
         "doc:serve": "mkdocs serve --dev-addr localhost:8094",
-        "doc:deploy": "mkdocs gh-deploy"
+        "doc:deploy": "mkdocs gh-deploy",
+        "phar:compile": "box compile",
+        "phar:info": "box info ./build/bin/mediatools.phar -l"
     },
     "archive": {
         "exclude": [".travis", "infection.json", ".sami.php", "phpstan.neon", "tests", "docs", ".travis", ".travis.yml", ".codeclimate.yml", ".coveralls.yml", ".scrutinizer.yml", ".php_cs", ".gitignore", "phpcs.xml"]
