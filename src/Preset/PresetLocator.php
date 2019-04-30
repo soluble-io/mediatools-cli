@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Soluble\MediaTools\Preset;
 
+use Psr\Container\ContainerInterface;
+use Soluble\MediaTools\Cli\Exception\UnknownPresetException;
 use Soluble\MediaTools\Preset\MP4\StreamableH264Preset;
 use Soluble\MediaTools\Preset\Prod\ResolvePreset;
 use Soluble\MediaTools\Preset\WebM\GoogleVod2019Preset;
@@ -22,17 +24,48 @@ class PresetLocator
     private $paths = [];
 
     /**
-     * @var string[]
+     * @var array<string, PresetInterface|string>
      */
-    private $presets;
+    private $presets = [];
 
-    public function __construct(array $paths = [])
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    public function __construct(ContainerInterface $container, array $paths = [])
     {
-        $this->paths   = array_merge($paths, [__DIR__]);
-        $this->presets = self::BUILTIN_PRESETS;
+        $this->paths     = array_merge($paths, [__DIR__]);
+        $this->container = $container;
+        $this->loadBuiltInPresets();
     }
 
-    public function isSupported(string $name): bool
+    protected function loadBuiltInPresets(): void
+    {
+        foreach (self::BUILTIN_PRESETS as $preset) {
+            $this->presets[$preset] = $preset;
+        }
+    }
+
+    public function addPreset(string $name, PresetInterface $preset): void
+    {
+        $this->presets[$name] = $preset;
+    }
+
+    public function getPreset(string $name): PresetInterface
+    {
+        if (!$this->hasPreset($name)) {
+            throw new UnknownPresetException(sprintf('Preset %s does not exists', $name));
+        }
+        $preset = $this->presets[$name];
+        if ($preset instanceof PresetInterface) {
+            return $preset;
+        }
+
+        return $this->container->get($name);
+    }
+
+    public function hasPreset(string $name): bool
     {
         return in_array($name, $this->presets, true);
     }

@@ -18,8 +18,7 @@ class PresetLoaderFactory
     public function __invoke(ContainerInterface $container): PresetLoader
     {
         return new PresetLoader(
-            new PresetLocator(),
-            $container
+            new PresetLocator($container, [])
         );
     }
 }

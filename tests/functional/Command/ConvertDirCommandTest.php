@@ -11,9 +11,14 @@ declare(strict_types=1);
 
 namespace MediaToolsCliTest\Functional\Command;
 
+use InvalidArgumentException;
 use MediaToolsCliTest\Util\TestConfigProviderTrait;
 use PHPUnit\Framework\TestCase;
 use Soluble\MediaTools\Cli\Command\ConvertDirCommandFactory;
+use Soluble\MediaTools\Preset\PresetInterface;
+use Soluble\MediaTools\Preset\PresetLocator;
+use Soluble\MediaTools\Video\SeekTime;
+use Soluble\MediaTools\Video\VideoConvertParams;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -31,7 +36,9 @@ class ConvertDirCommandTest extends TestCase
     protected function setUp(): void
     {
         $this->app = new Application();
-        $this->app->add((new ConvertDirCommandFactory())($this->getConfiguredContainer()));
+        $container = $this->getConfiguredContainer();
+        $container->get(PresetLocator::class)->addPreset();
+        $this->app->add((new ConvertDirCommandFactory())($container));
         $this->command = $this->app->find('convert:directory');
     }
 
@@ -40,12 +47,8 @@ class ConvertDirCommandTest extends TestCase
         $tester = new CommandTester($this->command);
 
         $tester->execute([
-            '--dir' => sys_get_temp_dir(),
-        ]);
-        self::assertEquals(0, $tester->getStatusCode());
-
-        $tester->execute([
-            '--dir' => $this->getAssetsTestDirectory(),
+            '--dir'    => $this->getAssetsTestDirectory(),
+            '--preset' => 'test_preset',
         ]);
 
         self::assertEquals(0, $tester->getStatusCode());
@@ -53,7 +56,7 @@ class ConvertDirCommandTest extends TestCase
 
     public function testScanDirectoriesThrowsInvalidDirectory(): void
     {
-        self::expectException(\InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $tester = new CommandTester($this->command);
         $tester->execute([
             '--dir' => './unexistent/directory',
@@ -62,8 +65,26 @@ class ConvertDirCommandTest extends TestCase
 
     public function testScanDirectoriesThrowsInvalidDirectory2(): void
     {
-        self::expectException(\InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $tester = new CommandTester($this->command);
         $tester->execute([]);
+    }
+
+    protected function getTestPreset(): PresetInterface
+    {
+        return new class() implements PresetInterface {
+            public function getName(): string
+            {
+                return 'test_preset';
+            }
+
+            public function getParams(string $file, ?int $width = null, ?int $height = null): VideoConvertParams
+            {
+                return (new VideoConvertParams())
+                    ->withVideoCodec('h264')
+                    ->withSeekStart(new SeekTime(0))
+                    ->withSeekEnd(new SeekTime(0.3));
+            }
+        };
     }
 }
