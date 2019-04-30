@@ -34,6 +34,11 @@ trait TestConfigProviderTrait
         return dirname(__DIR__, 1) . '/data';
     }
 
+    public function getTestTempDirectory(): string
+    {
+        return dirname(__DIR__, 1) . '/tmp';
+    }
+
     /**
      * @throws \Exception
      */

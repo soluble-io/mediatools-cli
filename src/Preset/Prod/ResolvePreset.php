@@ -24,11 +24,6 @@ class ResolvePreset implements PresetInterface
         $this->mediaTools = $mediaTools;
     }
 
-    public function getName(): string
-    {
-        return __CLASS__;
-    }
-
     private function getVideoInfo(string $file): VideoInfoInterface
     {
         if ($this->videoInfo === null) {
@@ -62,6 +57,11 @@ class ResolvePreset implements PresetInterface
             ->withOutputFormat('mov');
 
         return $params;
+    }
+
+    public function getFileExtension(): string
+    {
+        return 'mov';
     }
 }
 

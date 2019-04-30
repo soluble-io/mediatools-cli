@@ -28,16 +28,16 @@ class GoogleVod2019Preset implements PresetInterface
         $this->analyzer  = $analyzer;
     }
 
-    public function getName(): string
-    {
-        return __CLASS__;
-    }
-
     public function getParams(string $file, ?int $width = null, ?int $height = null): VideoConvertParams
     {
         $params = (new VideoConvertParams())
             ->withVideoCodec('vp9');
 
         return $params;
+    }
+
+    public function getFileExtension(): string
+    {
+        return 'webm';
     }
 }

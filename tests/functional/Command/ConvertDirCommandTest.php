@@ -54,6 +54,8 @@ class ConvertDirCommandTest extends TestCase
         $tester->execute([
             '--dir'    => $this->getAssetsTestDirectory(),
             '--preset' => 'test_preset',
+            '--output' => $this->getTestTempDirectory(),
+            '--exts'   => 'mov,m4v',
         ]);
 
         self::assertEquals(0, $tester->getStatusCode());
@@ -78,9 +80,9 @@ class ConvertDirCommandTest extends TestCase
     protected function getTestPreset(): PresetInterface
     {
         return new class() implements PresetInterface {
-            public function getName(): string
+            public function getFileExtension(): string
             {
-                return 'test_preset';
+                return 'mp4';
             }
 
             public function getParams(string $file, ?int $width = null, ?int $height = null): VideoConvertParams

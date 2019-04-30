@@ -31,6 +31,7 @@ install:
 jobs:
   allow_failures:
     - php: nightly
+    - stage: Psalm
 
   include:
     - stage: Tests
@@ -65,12 +66,16 @@ jobs:
         - ./vendor/bin/phpunit --testsuite unit -v -c .travis/phpunit.xml
 
 
-    - stage: PHPStan, Psalm and Code style
+    - stage: PHPStan and Code style
       php: 7.3
       env: XDEBUG=no INSTALL_FFMPEG=no REMOVE_QA=no
       script:
         - composer phpstan
-        - composer psalm
         - composer cs-check
 
+    - stage: Psalm
+      php: 7.3
+      env: XDEBUG=no INSTALL_FFMPEG=no REMOVE_QA=no
+      script:
+        - composer psalm
 
