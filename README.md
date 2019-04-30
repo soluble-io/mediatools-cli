@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/soluble-io/soluble-mediatools-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/soluble-io/soluble-mediatools-cli)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/soluble-io/soluble-mediatools-cli/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/soluble-io/soluble-mediatools-cli/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/soluble/mediatools-cli/v/stable.svg)](https://packagist.org/packages/soluble/mediatools-cli)
+![PHPStan](https://img.shields.io/badge/style-level%207-brightgreen.svg?style=flat-square&label=phpstan)
 [![License](https://poser.pugx.org/soluble/mediatools-cli/license.png)](https://packagist.org/packages/soluble/mediatools)
 
 ![Logo](./docs/assets/images/mediatools.png)
