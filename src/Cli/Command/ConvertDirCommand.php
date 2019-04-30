@@ -30,9 +30,7 @@ class ConvertDirCommand extends Command
     /** @var MediaToolsServiceInterface */
     private $mediaTools;
 
-    /**
-     * @var PresetLoader
-     */
+    /** @var PresetLoader */
     private $presetLoader;
 
     /** @var string[] */
@@ -100,7 +98,7 @@ class ConvertDirCommand extends Command
                 $outputFile = sprintf('%s%s', (string) $file, '.mov');
 
                 if (!file_exists($outputFile)) {
-                    $converter->convert((string) $file, $outputFile, $params, function ($stdOut, $stdErr) use ($output) {
+                    $converter->convert((string) $file, $outputFile, $params, function ($stdOut, $stdErr) use ($output): void {
                         $output->write($stdErr);
                     });
 

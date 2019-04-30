@@ -15,22 +15,16 @@ class PresetLocator
     public const BUILTIN_PRESETS = [
         ResolvePreset::class,
         StreamableH264Preset::class,
-        GoogleVod2019Preset::class
+        GoogleVod2019Preset::class,
     ];
 
-    /**
-     * @var string[]
-     */
+    /** @var string[] */
     private $paths = [];
 
-    /**
-     * @var array<string, PresetInterface|string>
-     */
+    /** @var array<string, PresetInterface|string> */
     private $presets = [];
 
-    /**
-     * @var ContainerInterface
-     */
+    /** @var ContainerInterface */
     private $container;
 
     public function __construct(ContainerInterface $container, array $paths = [])
@@ -67,6 +61,6 @@ class PresetLocator
 
     public function hasPreset(string $name): bool
     {
-        return in_array($name, $this->presets, true);
+        return array_key_exists($name, $this->presets);
     }
 }

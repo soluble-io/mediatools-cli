@@ -16,7 +16,7 @@ use MediaToolsCliTest\Util\TestConfigProviderTrait;
 use PHPUnit\Framework\TestCase;
 use Soluble\MediaTools\Cli\Command\ConvertDirCommandFactory;
 use Soluble\MediaTools\Preset\PresetInterface;
-use Soluble\MediaTools\Preset\PresetLocator;
+use Soluble\MediaTools\Preset\PresetLoader;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoConvertParams;
 use Symfony\Component\Console\Application;
@@ -36,8 +36,13 @@ class ConvertDirCommandTest extends TestCase
     protected function setUp(): void
     {
         $this->app = new Application();
+
         $container = $this->getConfiguredContainer();
-        $container->get(PresetLocator::class)->addPreset();
+
+        $container->get(PresetLoader::class)
+            ->getLocator()
+            ->addPreset('test_preset', $this->getTestPreset());
+
         $this->app->add((new ConvertDirCommandFactory())($container));
         $this->command = $this->app->find('convert:directory');
     }
