@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Soluble\MediaTools\Cli\Config;
 
+use DomainException;
 use Soluble\MediaTools\Cli\Command\ConvertDirCommand;
 use Soluble\MediaTools\Cli\Command\ConvertDirCommandFactory;
 use Soluble\MediaTools\Cli\Command\ScanCommand;
@@ -49,6 +50,8 @@ class ConfigProvider
     /**
      * Returns the container dependencies.
      *
+     * @throws DomainException
+     *
      * @return array<string, array>
      */
     public function getDependencies(): array
@@ -83,6 +86,12 @@ class ConfigProvider
                 ],
             ]
         );
+
+        if ($arr === null) {
+            throw new DomainException(sprintf(
+                'Could not merge ConfigProvider configurations.'
+            ));
+        }
 
         return $arr;
     }
