@@ -97,7 +97,7 @@ class ScanCommand extends Command
         $output->writeln('');
         $output->writeln('* Available media files:');
 
-        $this->renderResultsTable($output, $medias['rows'], $medias['totalSize']);
+        self::renderMediaInTable($output, $medias['rows'], $medias['totalSize']);
 
         // display warnings
 
@@ -117,7 +117,7 @@ class ScanCommand extends Command
         return 0;
     }
 
-    private function renderResultsTable(OutputInterface $output, array $rows, int $totalSize, array $columns = []): void
+    static public function renderMediaInTable(OutputInterface $output, array $rows, int $totalSize, array $columns = []): void
     {
         $sizeFormatter = new ByteFormatter();
 
