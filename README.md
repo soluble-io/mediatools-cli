@@ -15,13 +15,13 @@ Console
 ## Scanning medias
 
 ```
-$ php bin/mediatools-cli scan:videos --dir ./test
+php bin/mediatools-cli.php scan:videos --dir ./tests/data
 ```
 
 ## Converting medias
 
 ```
-bin/mediatools-cli.sh convert:directory \
+php bin/mediatools-cli.php convert:directory \
   --dir tests/data \
   --preset "Soluble\MediaTools\Preset\Prod\ResolvePreset" \
   --exts mp4,m4v \
