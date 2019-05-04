@@ -150,11 +150,11 @@ class ScanCommand extends Command
                     'duration'   => preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
                     'codec'      => sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
                     'resolution' => sprintf(
-                        '%sx%s%s',
+                        '%sx%s',
                         $vStream->getWidth(),
-                        $vStream->getHeight(),
-                        $fps !== '' ? " <fg=yellow>${fps}fps</>" : ''
+                        $vStream->getHeight()
                     ),
+                    'fps' => $fps,
                     'bitrate' => ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
                     'size'    => $sizeFormatter->format($fileSize),
                     'pixFmt'  => $pixFmt,
@@ -195,12 +195,13 @@ class ScanCommand extends Command
             'duration',
             'codec',
             'size',
+            'fps',
             'bitrate',
             'filesize',
             'pix_fmt',
         ]);
 
-        foreach ($colIndexes = [1, 2, 3, 4, 5] as $idx) {
+        foreach ($colIndexes = [1, 2, 3, 4, 5, 6] as $idx) {
             $table->setColumnStyle($idx, $rightAlignstyle);
         }
 

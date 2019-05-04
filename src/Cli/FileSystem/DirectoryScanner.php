@@ -34,13 +34,6 @@ class DirectoryScanner
             $finder->depth('== 0');
         }
 
-        $videos = [];
-
-        /** @var \SplFileInfo $file */
-        foreach ($finder as $file) {
-            $videos[] = $file;
-        }
-
-        return $videos;
+        return iterator_to_array($finder->getIterator());
     }
 }
