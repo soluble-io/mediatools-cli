@@ -15,6 +15,7 @@ use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
 use Soluble\MediaTools\Cli\Media\FileExtensions;
 use Soluble\MediaTools\Cli\Media\MediaScanner;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
+use Soluble\MediaTools\Cli\Util\FFMpegProgress;
 use Soluble\MediaTools\Common\Exception\ProcessException;
 use Soluble\MediaTools\Preset\PresetInterface;
 use Soluble\MediaTools\Preset\PresetLoader;
@@ -125,16 +126,14 @@ class ConvertDirCommand extends Command
 
         $output->writeln('* Reading metadata...');
 
-        $progressBar = new ProgressBar($output, count($files));
-        $progressBar->start();
+        $readProgress = new ProgressBar($output, count($files));
+        $readProgress->start();
 
-        $medias = (new MediaScanner($this->mediaTools->getReader()))->getMedias($files, function () use ($progressBar) {
-            $progressBar->advance();
+        $medias = (new MediaScanner($this->mediaTools->getReader()))->getMedias($files, function () use ($readProgress): void {
+            $readProgress->advance();
         });
 
-        $progressBar->finish();
-
-        $err = 'frame=  991 fps= 46 q=1.0 size=  588032kB time=00:00:33.04 bitrate=145774.2kbits/s speed=1.53x';
+        $readProgress->finish();
 
         // Ask confirmation
         ScanCommand::renderMediaInTable($output, $medias['rows'], $medias['totalSize']);
@@ -147,11 +146,10 @@ class ConvertDirCommand extends Command
 
         $converter = $this->mediaTools->getConverter();
 
-        /** @var \SplFileInfo $file */
-        foreach ($files as $file) {
+        /* @var \SplFileInfo $file */
+        foreach ($medias['rows'] as $row) {
+            $file = $row['file'];
             try {
-                $params = $preset->getParams($file->getPathname());
-
                 $outputFile = sprintf(
                     '%s/%s%s',
                     $outputDir,
@@ -166,10 +164,21 @@ class ConvertDirCommand extends Command
                 }
 
                 if (!file_exists($outputFile)) {
-                    $converter->convert((string) $file, $tmpFile, $params, function ($stdOut, $stdErr) use ($output): void {
-                        // frame=  991 fps= 46 q=1.0 size=  588032kB time=00:00:33.04 bitrate=145774.2kbits/s speed=1.53x
-                        $output->write($stdErr);
+                    $progress    = new FFMpegProgress();
+                    $progressBar = new ProgressBar($output, (int) $row['total_time']);
+                    $params      = $preset->getParams($file->getPathname());
+
+                    $output->writeln(sprintf('Convert %s to %s', $file->getBasename(), $outputFile));
+
+                    $converter->convert((string) $file, $tmpFile, $params, function ($stdOut, $stdErr) use ($progressBar, $progress): void {
+                        $info = $progress->getProgress($stdErr);
+                        if ($info === null) {
+                            return;
+                        }
+
+                        $progressBar->setProgress((int) $info['time']);
                     });
+                    $progressBar->finish();
                     $success = rename($tmpFile, $outputFile);
                     if (!$success) {
                         throw new \RuntimeException(sprintf(
@@ -181,16 +190,13 @@ class ConvertDirCommand extends Command
 
                     $output->writeln(sprintf('<fg=green>- Converted:</> %s.', $file));
                 } else {
-                    $output->writeln(sprintf('<fg=yellow>- Skipped:</> %s : Output file already exists.', $file));
+                    $output->writeln(sprintf('<fg=yellow>- Skipped:</> %s : Output file already exists (%s).', (string) $file, $outputFile));
                 }
             } catch (ProcessException $e) {
-                $output->writeln(sprintf('<fg=red>- Skipped:</> %s : Not a valid media file.', $file));
+                $output->writeln(sprintf('<fg=red>- Skipped:</> %s : Not a valid media file.', (string) $file));
             }
-
-            //$progressBar->advance();
         }
 
-        $progressBar->finish();
         $output->writeln('');
 
         return 0;

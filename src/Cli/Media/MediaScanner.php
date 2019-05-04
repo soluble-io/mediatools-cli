@@ -13,9 +13,7 @@ use SplFileInfo;
 
 class MediaScanner
 {
-    /**
-     * @var VideoInfoReaderInterface
-     */
+    /** @var VideoInfoReaderInterface */
     private $reader;
 
     public function __construct(VideoInfoReaderInterface $videoInfoReader)
@@ -45,12 +43,15 @@ class MediaScanner
                 $pixFmt   = $vStream->getPixFmt();
                 $bitRate  = $vStream->getBitRate();
                 $fileSize = $file->getSize();
+                $frames   = $vStream->getNbFrames();
 
                 $fps = (string) ($vStream->getFps(0) ?? '');
 
                 $row = [
-                    'video'      => $file,
+                    'file'       => $file,
                     'duration'   => preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
+                    'frames'     => $frames,
+                    'total_time' => $info->getDuration(),
                     'codec'      => sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
                     'resolution' => sprintf(
                         '%sx%s',
@@ -70,15 +71,17 @@ class MediaScanner
                 $warnings[] = [$videoFile];
             }
 
-            if ($callback !== null) {
-                $callback();
+            if ($callback === null) {
+                continue;
             }
+
+            $callback();
         }
 
         return [
             'rows'      => $rows,
             'totalSize' => $totalSize,
-            'warnings'  => $warnings
+            'warnings'  => $warnings,
         ];
     }
 }

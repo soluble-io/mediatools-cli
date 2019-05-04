@@ -88,7 +88,7 @@ class ScanCommand extends Command
         $progressBar = new ProgressBar($output, count($videos));
         $progressBar->start();
 
-        $medias = (new MediaScanner($this->reader))->getMedias($videos, function () use ($progressBar) {
+        $medias = (new MediaScanner($this->reader))->getMedias($videos, function () use ($progressBar): void {
             $progressBar->advance();
         });
 
@@ -148,7 +148,7 @@ class ScanCommand extends Command
 
         foreach ($rows as $idx => $row) {
             /** @var \SplFileInfo $file */
-            $file         = $row['video'];
+            $file         = $row['file'];
             $fileName     = $file->getBasename();
             $fileName     = mb_strlen($fileName) > 30 ? mb_substr($file->getBasename(), 0, 30) . '[...].' . $file->getExtension() : $fileName;
             $row['video'] = $fileName;

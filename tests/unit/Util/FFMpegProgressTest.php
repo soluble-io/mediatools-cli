@@ -31,7 +31,7 @@ class FFMpegProgressTest extends TestCase
             'frame' => 991,
             'size'  => '588032kB',
             'time'  => 33.04,
-            'speed' => 1.53
+            'speed' => 1.53,
         ], $info);
     }
 }
