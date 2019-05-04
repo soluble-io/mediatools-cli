@@ -50,12 +50,13 @@ class ConvertDirCommandTest extends TestCase
     public function testScanDirectories(): void
     {
         $tester = new CommandTester($this->command);
-
+        //$tester->setInputs(['yes']);
         $tester->execute([
-            '--dir'    => $this->getAssetsTestDirectory(),
-            '--preset' => 'test_preset',
-            '--output' => $this->getTestTempDirectory(),
-            '--exts'   => 'mov,m4v',
+            '--dir'            => $this->getAssetsTestDirectory(),
+            '--preset'         => 'test_preset',
+            '--output'         => $this->getTestTempDirectory(),
+            '--exts'           => 'mov,m4v',
+            '--no-interaction' => true,
         ]);
 
         self::assertEquals(0, $tester->getStatusCode());
@@ -74,6 +75,8 @@ class ConvertDirCommandTest extends TestCase
     {
         self::expectException(InvalidArgumentException::class);
         $tester = new CommandTester($this->command);
+        $tester->setInputs(['yes']);
+
         $tester->execute([]);
     }
 

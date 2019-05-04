@@ -59,6 +59,7 @@ class ConvertDirCommand extends Command
                     new InputOption('exts', ['e', 'extensions'], InputOption::VALUE_OPTIONAL, 'File extensions to process (ie. m4v,mp4,mov)'),
                     new InputOption('output', ['o', 'out'], InputOption::VALUE_REQUIRED, 'Output directory'),
                     new InputOption('recursive', 'r', InputOption::VALUE_NONE, 'Recursive mode'),
+                    new InputOption('no-interaction', 'n', InputOption::VALUE_NONE, 'No interaction, set yes to all'),
                 ])
             );
     }
@@ -115,6 +116,8 @@ class ConvertDirCommand extends Command
 
         $recursive = $input->getOption('recursive') === true;
 
+        $no_interaction = $input->getOption('no-interaction') === true;
+
         // ########################
         // Step 5: Scanning dir
         // ########################
@@ -140,7 +143,7 @@ class ConvertDirCommand extends Command
 
         $question = new ConfirmationQuestion('Convert files ?', false);
 
-        if (!$helper->ask($input, $output, $question)) {
+        if (!$no_interaction && !$helper->ask($input, $output, $question)) {
             return 0;
         }
 
