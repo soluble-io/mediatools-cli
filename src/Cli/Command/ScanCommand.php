@@ -12,12 +12,14 @@ declare(strict_types=1);
 namespace Soluble\MediaTools\Cli\Command;
 
 use ScriptFUSION\Byte\ByteFormatter;
+use Soluble\MediaTools\Cli\Exception\InvalidArgumentException;
 use Soluble\MediaTools\Cli\Exception\MissingFFProbeBinaryException;
 use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
 use Soluble\MediaTools\Cli\Media\FileExtensions;
 use Soluble\MediaTools\Video\Exception as VideoException;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
+use SplFileInfo;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
@@ -54,34 +56,75 @@ class ScanCommand extends Command
             ->setDescription('Scan for video')
             ->setDefinition(
                 new InputDefinition([
-                    new InputOption('dir', 'd', InputOption::VALUE_REQUIRED),
+                    new InputOption('dir', 'd', InputOption::VALUE_REQUIRED, 'Directory to scan'),
+                    new InputOption('recursive', 'r', InputOption::VALUE_NONE, 'Recursive mode'),
                 ])
             );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$input->hasOption('dir')) {
-            throw new \InvalidArgumentException('Missing dir argument, use <command> <dir>');
+            throw new InvalidArgumentException('Missing dir argument, use <command> <dir>');
         }
+
         $videoPath = $input->getOption('dir');
         if (!is_string($videoPath) || !is_dir($videoPath)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'Video dir %s does not exists',
                 is_string($videoPath) ? $videoPath : json_encode($videoPath)
             ));
         }
 
+        $recursive = $input->getOption('recursive') === true;
+
         $output->writeln(sprintf('* Scanning %s for files...', $videoPath));
 
         // Get the videos in path
-        $videos = (new DirectoryScanner())->findFiles($videoPath, $this->supportedVideoExtensions);
+        $videos = (new DirectoryScanner())->findFiles($videoPath, $this->supportedVideoExtensions, $recursive);
 
         $output->writeln('* Reading metadata...');
 
         $progressBar = new ProgressBar($output, count($videos));
         $progressBar->start();
 
+        $medias = $this->getMedias($videos, $this->reader, function () use ($progressBar) {
+            $progressBar->advance();
+        });
+
+        $progressBar->finish();
+
+        $output->writeln('');
+        $output->writeln('* Available media files:');
+
+        $this->renderResultsTable($output, $medias['rows'], $medias['totalSize']);
+
+        // display warnings
+
+        if (count($medias['warnings']) > 0) {
+            $output->writeln('* The following files were not detected as valid medias:');
+            $table = new Table($output);
+            $table->setHeaders([
+                'Unsupported files',
+            ]);
+            $table->setStyle('box-double');
+            $table->setRows($medias['warnings']);
+            $table->render();
+        }
+
+        $output->writeln('');
+
+        return 0;
+    }
+
+    /**
+     * @param SplFileInfo[] $files
+     */
+    private function getMedias(array $files, VideoInfoReaderInterface $reader, ?callable $callback): array
+    {
         $bitRateFormatter = new ByteFormatter();
         $sizeFormatter    = new ByteFormatter();
 
@@ -89,21 +132,21 @@ class ScanCommand extends Command
         $warnings  = [];
         $totalSize = 0;
 
-        /** @var \SplFileInfo $video */
-        foreach ($videos as $video) {
-            $videoFile = $video->getPathname();
+        /** @var SplFileInfo $file */
+        foreach ($files as $file) {
+            $videoFile = $file->getPathname();
             try {
-                $info     = $this->reader->getInfo($videoFile);
+                $info     = $reader->getInfo($videoFile);
                 $vStream  = $info->getVideoStreams()->getFirst();
                 $aStream  = $info->getAudioStreams()->getFirst();
                 $pixFmt   = $vStream->getPixFmt();
                 $bitRate  = $vStream->getBitRate();
-                $fileSize = $video->getSize();
+                $fileSize = $file->getSize();
 
                 $fps = (string) ($vStream->getFps(0) ?? '');
 
                 $row = [
-                    'video'      => $video,
+                    'video'      => $file,
                     'duration'   => preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
                     'codec'      => sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
                     'resolution' => sprintf(
@@ -124,30 +167,16 @@ class ScanCommand extends Command
                 $warnings[] = [$videoFile];
             }
 
-            $progressBar->advance();
-        }
-        $progressBar->finish();
-
-        $output->writeln('');
-        $output->writeln('* Available media files:');
-
-        $this->renderResultsTable($output, $rows, $totalSize);
-
-        // display warnings
-        if (count($warnings) > 0) {
-            $output->writeln('* The following files were not detected as valid medias:');
-            $table = new Table($output);
-            $table->setHeaders([
-                'Unsupported files',
-            ]);
-            $table->setStyle('box-double');
-            $table->setRows($warnings);
-            $table->render();
+            if ($callback !== null) {
+                $callback();
+            }
         }
 
-        $output->writeln('');
-
-        return 0;
+        return [
+            'rows'      => $rows,
+            'totalSize' => $totalSize,
+            'warnings'  => $warnings
+        ];
     }
 
     private function renderResultsTable(OutputInterface $output, array $rows, int $totalSize, array $columns = []): void

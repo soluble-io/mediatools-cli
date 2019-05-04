@@ -8,26 +8,36 @@ use Symfony\Component\Finder\Finder;
 
 class DirectoryScanner
 {
-    /**
-     * @return array<\SplFileInfo>
-     */
-    public function findFiles(string $path, ?array $validExtensions = null): array
+    public function getFinder(string $path, ?array $validExtensions = null): Finder
     {
-        $files = (new Finder())->files()
+        $finder = (new Finder())->files()
             ->in($path)
             ->ignoreUnreadableDirs();
-
         if ($validExtensions !== null && count($validExtensions) > 0) {
-            $files->name(sprintf(
+            $finder->name(sprintf(
                 '/\.(%s)$/i',
                 implode('|', $validExtensions)
             ));
         }
 
+        return $finder;
+    }
+
+    /**
+     * @return array<\SplFileInfo>
+     */
+    public function findFiles(string $path, ?array $validExtensions = null, bool $recursive = true): array
+    {
+        $finder = $this->getFinder($path, $validExtensions);
+
+        if (!$recursive) {
+            $finder->depth('== 0');
+        }
+
         $videos = [];
 
         /** @var \SplFileInfo $file */
-        foreach ($files as $file) {
+        foreach ($finder as $file) {
             $videos[] = $file;
         }
 
