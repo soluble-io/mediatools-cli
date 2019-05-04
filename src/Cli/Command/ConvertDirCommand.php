@@ -172,13 +172,13 @@ class ConvertDirCommand extends Command
 
                     $converter->convert((string) $file, $tmpFile, $params, function ($stdOut, $stdErr) use ($progressBar, $progress): void {
                         $info = $progress->getProgress($stdErr);
-                        if ($info === null) {
+                        if (!is_array($info)) {
                             return;
                         }
-
                         $progressBar->setProgress((int) $info['time']);
                     });
                     $progressBar->finish();
+                    $output->writeln('');
                     $success = rename($tmpFile, $outputFile);
                     if (!$success) {
                         throw new \RuntimeException(sprintf(
