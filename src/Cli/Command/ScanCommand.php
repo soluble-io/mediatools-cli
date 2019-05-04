@@ -13,13 +13,10 @@ namespace Soluble\MediaTools\Cli\Command;
 
 use ScriptFUSION\Byte\ByteFormatter;
 use Soluble\MediaTools\Cli\Exception\InvalidArgumentException;
-use Soluble\MediaTools\Cli\Exception\MissingFFProbeBinaryException;
 use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
 use Soluble\MediaTools\Cli\Media\FileExtensions;
-use Soluble\MediaTools\Video\Exception as VideoException;
-use Soluble\MediaTools\Video\SeekTime;
+use Soluble\MediaTools\Cli\Media\MediaScanner;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
-use SplFileInfo;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
@@ -91,7 +88,7 @@ class ScanCommand extends Command
         $progressBar = new ProgressBar($output, count($videos));
         $progressBar->start();
 
-        $medias = $this->getMedias($videos, $this->reader, function () use ($progressBar) {
+        $medias = (new MediaScanner($this->reader))->getMedias($videos, function () use ($progressBar) {
             $progressBar->advance();
         });
 
@@ -118,65 +115,6 @@ class ScanCommand extends Command
         $output->writeln('');
 
         return 0;
-    }
-
-    /**
-     * @param SplFileInfo[] $files
-     */
-    private function getMedias(array $files, VideoInfoReaderInterface $reader, ?callable $callback): array
-    {
-        $bitRateFormatter = new ByteFormatter();
-        $sizeFormatter    = new ByteFormatter();
-
-        $rows      = [];
-        $warnings  = [];
-        $totalSize = 0;
-
-        /** @var SplFileInfo $file */
-        foreach ($files as $file) {
-            $videoFile = $file->getPathname();
-            try {
-                $info     = $reader->getInfo($videoFile);
-                $vStream  = $info->getVideoStreams()->getFirst();
-                $aStream  = $info->getAudioStreams()->getFirst();
-                $pixFmt   = $vStream->getPixFmt();
-                $bitRate  = $vStream->getBitRate();
-                $fileSize = $file->getSize();
-
-                $fps = (string) ($vStream->getFps(0) ?? '');
-
-                $row = [
-                    'video'      => $file,
-                    'duration'   => preg_replace('/\.([0-9])+$/', '', SeekTime::convertSecondsToHMSs(round($info->getDuration(), 1))),
-                    'codec'      => sprintf('%s/%s', $vStream->getCodecName(), $aStream->getCodecName()),
-                    'resolution' => sprintf(
-                        '%sx%s',
-                        $vStream->getWidth(),
-                        $vStream->getHeight()
-                    ),
-                    'fps' => $fps,
-                    'bitrate' => ($bitRate > 0 ? $bitRateFormatter->format((int) $bitRate) . '/s' : ''),
-                    'size'    => $sizeFormatter->format($fileSize),
-                    'pixFmt'  => $pixFmt,
-                ];
-                $rows[] = $row;
-                $totalSize += $fileSize;
-            } catch (VideoException\MissingFFProbeBinaryException $e) {
-                throw new MissingFFProbeBinaryException('Unable to run ffprobe binary, check your config and ensure it\'s properly installed');
-            } catch (VideoException\InfoReaderExceptionInterface $e) {
-                $warnings[] = [$videoFile];
-            }
-
-            if ($callback !== null) {
-                $callback();
-            }
-        }
-
-        return [
-            'rows'      => $rows,
-            'totalSize' => $totalSize,
-            'warnings'  => $warnings
-        ];
     }
 
     private function renderResultsTable(OutputInterface $output, array $rows, int $totalSize, array $columns = []): void
