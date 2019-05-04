@@ -13,6 +13,7 @@ namespace Soluble\MediaTools\Cli\Command;
 
 use Soluble\MediaTools\Cli\FileSystem\DirectoryScanner;
 use Soluble\MediaTools\Cli\Media\FileExtensions;
+use Soluble\MediaTools\Cli\Media\MediaScanner;
 use Soluble\MediaTools\Cli\Service\MediaToolsServiceInterface;
 use Soluble\MediaTools\Common\Exception\ProcessException;
 use Soluble\MediaTools\Preset\PresetInterface;
@@ -23,6 +24,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Webmozart\Assert\Assert;
 
 class ConvertDirCommand extends Command
@@ -55,12 +57,15 @@ class ConvertDirCommand extends Command
                     new InputOption('preset', ['p'], InputOption::VALUE_REQUIRED, 'Conversion preset to use'),
                     new InputOption('exts', ['e', 'extensions'], InputOption::VALUE_OPTIONAL, 'File extensions to process (ie. m4v,mp4,mov)'),
                     new InputOption('output', ['o', 'out'], InputOption::VALUE_REQUIRED, 'Output directory'),
+                    new InputOption('recursive', 'r', InputOption::VALUE_NONE, 'Recursive mode'),
                 ])
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $helper = $this->getHelper('question');
+
         // ########################
         // Step 1: Check directory
         // ########################
@@ -107,6 +112,8 @@ class ConvertDirCommand extends Command
             $exts = FileExtensions::BUILTIN_EXTENSIONS;
         }
 
+        $recursive = $input->getOption('recursive') === true;
+
         // ########################
         // Step 5: Scanning dir
         // ########################
@@ -114,12 +121,29 @@ class ConvertDirCommand extends Command
         $output->writeln(sprintf('* Scanning %s for media files...', $directory));
 
         // Get the videos in path
-        $files = (new DirectoryScanner())->findFiles($directory, $exts);
+        $files = (new DirectoryScanner())->findFiles($directory, $exts, $recursive);
 
         $output->writeln('* Reading metadata...');
 
         $progressBar = new ProgressBar($output, count($files));
-        //$progressBar->start();
+        $progressBar->start();
+
+        $medias = (new MediaScanner($this->mediaTools->getReader()))->getMedias($files, function () use ($progressBar) {
+            $progressBar->advance();
+        });
+
+        $progressBar->finish();
+
+        $err = 'frame=  991 fps= 46 q=1.0 size=  588032kB time=00:00:33.04 bitrate=145774.2kbits/s speed=1.53x';
+
+        // Ask confirmation
+        ScanCommand::renderMediaInTable($output, $medias['rows'], $medias['totalSize']);
+
+        $question = new ConfirmationQuestion('Convert files ?', false);
+
+        if (!$helper->ask($input, $output, $question)) {
+            return 0;
+        }
 
         $converter = $this->mediaTools->getConverter();
 
@@ -135,10 +159,25 @@ class ConvertDirCommand extends Command
                     $preset->getFileExtension()
                 );
 
+                $tmpFile = sprintf('%s.tmp', $outputFile);
+
+                if (realpath($outputFile) === realpath((string) $file)) {
+                    throw new \RuntimeException(sprintf('Conversion error, input and output files are the same: %s', $outputFile));
+                }
+
                 if (!file_exists($outputFile)) {
-                    $converter->convert((string) $file, $outputFile, $params, function ($stdOut, $stdErr) use ($output): void {
+                    $converter->convert((string) $file, $tmpFile, $params, function ($stdOut, $stdErr) use ($output): void {
+                        // frame=  991 fps= 46 q=1.0 size=  588032kB time=00:00:33.04 bitrate=145774.2kbits/s speed=1.53x
                         $output->write($stdErr);
                     });
+                    $success = rename($tmpFile, $outputFile);
+                    if (!$success) {
+                        throw new \RuntimeException(sprintf(
+                            'Cannot rename temp file %s to %s',
+                            basename($tmpFile),
+                            $outputFile
+                        ));
+                    }
 
                     $output->writeln(sprintf('<fg=green>- Converted:</> %s.', $file));
                 } else {
@@ -155,6 +194,11 @@ class ConvertDirCommand extends Command
         $output->writeln('');
 
         return 0;
+    }
+
+    private function grepFrame(string $line): int
+    {
+        return 1;
     }
 
     private function getPreset(string $presetName): PresetInterface

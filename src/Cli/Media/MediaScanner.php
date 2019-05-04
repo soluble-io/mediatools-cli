@@ -10,11 +10,6 @@ use Soluble\MediaTools\Video\Exception as VideoException;
 use Soluble\MediaTools\Video\SeekTime;
 use Soluble\MediaTools\Video\VideoInfoReaderInterface;
 use SplFileInfo;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableCell;
-use Symfony\Component\Console\Helper\TableSeparator;
-use Symfony\Component\Console\Helper\TableStyle;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class MediaScanner
 {
@@ -86,6 +81,4 @@ class MediaScanner
             'warnings'  => $warnings
         ];
     }
-
-
 }
