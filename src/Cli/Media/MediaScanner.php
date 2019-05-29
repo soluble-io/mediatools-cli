@@ -36,6 +36,7 @@ class MediaScanner
         /** @var SplFileInfo $file */
         foreach ($files as $file) {
             $videoFile = $file->getPathname();
+
             try {
                 $info     = $this->reader->getInfo($videoFile);
                 $vStream  = $info->getVideoStreams()->getFirst();

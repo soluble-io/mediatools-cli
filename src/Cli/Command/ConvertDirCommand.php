@@ -149,9 +149,10 @@ class ConvertDirCommand extends Command
 
         $converter = $this->mediaTools->getConverter();
 
-        /* @var \SplFileInfo $file */
+        // @var \SplFileInfo $file
         foreach ($medias['rows'] as $row) {
             $file = $row['file'];
+
             try {
                 $outputFile = sprintf(
                     '%s/%s%s',
