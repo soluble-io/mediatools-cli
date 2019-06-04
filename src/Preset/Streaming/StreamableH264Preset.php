@@ -16,7 +16,7 @@ class StreamableH264Preset implements PresetInterface
     /** @var MediaToolsServiceInterface */
     private $mediaTools;
 
-    /** @var VideoInfoInterface */
+    /** @var VideoInfoInterface|null */
     private $videoInfo;
 
     public function __construct(MediaToolsServiceInterface $mediaTools)

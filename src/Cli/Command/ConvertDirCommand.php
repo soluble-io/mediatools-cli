@@ -64,6 +64,9 @@ class ConvertDirCommand extends Command
             );
     }
 
+    /**
+     * @psalm-suppress PossiblyInvalidArgument
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $helper = $this->getHelper('question');
@@ -174,7 +177,7 @@ class ConvertDirCommand extends Command
 
                     $output->writeln(sprintf('Convert %s to %s', $file->getBasename(), $outputFile));
 
-                    $converter->convert((string) $file, $tmpFile, $params, function ($stdOut, $stdErr) use ($progressBar, $progress): void {
+                    $converter->convert((string) $file, $tmpFile, $params, function (string $stdOut, string $stdErr) use ($progressBar, $progress): void {
                         $info = $progress->getProgress($stdErr);
                         if (!is_array($info)) {
                             return;
@@ -204,11 +207,6 @@ class ConvertDirCommand extends Command
         $output->writeln('');
 
         return 0;
-    }
-
-    private function grepFrame(string $line): int
-    {
-        return 1;
     }
 
     private function getPreset(string $presetName): PresetInterface

@@ -50,6 +50,8 @@ class ConfigProvider
     /**
      * Returns the container dependencies.
      *
+     * @psalm-suppress TypeDoesNotContainNull
+     *
      * @throws DomainException
      *
      * @return array<string, array>

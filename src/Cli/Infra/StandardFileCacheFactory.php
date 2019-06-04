@@ -13,15 +13,28 @@ namespace Soluble\MediaTools\Cli\Infra;
 
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Soluble\MediaTools\Cli\Exception\ConfigException;
+use Soluble\MediaTools\Common\Cache\NullCache;
 
 class StandardFileCacheFactory
 {
+    /**
+     * @throws ConfigException
+     */
     public function __invoke(ContainerInterface $container): CacheInterface
     {
-        return new \Symfony\Component\Cache\Simple\FilesystemCache(
-            'soluble-mediatools-cli',
-            86400,
-            \Soluble\MediaTools\Cli\Config\ConfigProvider::getProjectCacheDirectory()
-        );
+        $cache =  $container->get('config')['soluble-mediatools']['cache'] ?? null;
+        if ($cache === null) {
+            return new NullCache();
+        } elseif (!is_callable($cache)) {
+            throw new ConfigException("Config exception, 'cache' must be callable or null");
+        }
+
+        $c = $cache();
+        if (!$c instanceof CacheInterface) {
+            throw new ConfigException("Config exception, 'cache' must return a psr16 cache implementation");
+        }
+
+        return $c;
     }
 }

@@ -3,6 +3,9 @@
  * Default configuration file
  */
 
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Psr16Cache;
+
 return [
 
     'soluble-mediatools' => [
@@ -40,15 +43,16 @@ return [
         'ffprobe.idle_timeout'  => null,       // <null>: no idle timeout, <number>: number of seconds of inactivity before timing-out
         'ffprobe.env'           => [],         // An array of additional env vars to set when running the ffprobe
 
-        'cache' => (function() {
-            return new \Symfony\Component\Cache\Simple\FilesystemCache(
+        'cache' => (function(): \Psr\SimpleCache\CacheInterface {
+            $cache = new FilesystemAdapter(
                 'soluble-mediatools-cli',
                 86400,
                 \Soluble\MediaTools\Cli\Config\ConfigProvider::getProjectCacheDirectory()
             );
-        })(),
+            return new Psr16Cache($cache);
+        }),
 
-        'logger' => (function() {
+        'logger' => (function(): \Psr\Log\LoggerInterface {
             $logger = new \Monolog\Logger('soluble-mediatools-cli');
             $logger->pushHandler(
                 new \Monolog\Handler\StreamHandler(
@@ -57,6 +61,6 @@ return [
                 )
             );
             return $logger;
-        })(),
+        }),
     ],
 ];

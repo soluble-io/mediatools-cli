@@ -24,6 +24,8 @@ class DirectoryScanner
     }
 
     /**
+     * @psalm-suppress PossiblyInvalidArgument
+     *
      * @return array<\SplFileInfo>
      */
     public function findFiles(string $path, ?array $validExtensions = null, bool $recursive = true): array
