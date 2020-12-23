@@ -117,6 +117,12 @@ class ScanCommand extends Command
         return 0;
     }
 
+    /**
+     * @param OutputInterface $output
+     * @param array           $rows
+     * @param int             $totalSize
+     * @param array<mixed>    $columns
+     */
     public static function renderMediaInTable(OutputInterface $output, array $rows, int $totalSize, array $columns = []): void
     {
         $sizeFormatter = new ByteFormatter();
