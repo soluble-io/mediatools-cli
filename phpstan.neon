@@ -9,6 +9,8 @@ parameters:
 		- php
 		- dist
 	reportUnmatchedIgnoredErrors: false
+	checkMissingIterableValueType: false
+
 	ignoreErrors:
 
 		# Wrong case for phpstan
