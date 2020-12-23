@@ -36,13 +36,25 @@ jobs:
 
   include:
     - stage: Tests
-      php: 7.3
+      php: 8
+      env: COMPOSER_ARGS=--ignore-platform-reqs REMOVE_QA=yes
+      script:
+        - ./vendor/bin/phpunit --testsuite unit -v -c .travis/phpunit.xml
+
+    - stage: Tests
+      php: 7.4
       env: XDEBUG=yes INSTALL_FFMPEG=yes REMOVE_QA=yes
       script:
         - ./vendor/bin/phpunit -v -c .travis/phpunit.xml --coverage-clover=coverage.xml
         - wget https://scrutinizer-ci.com/ocular.phar
         - php ocular.phar code-coverage:upload --format=php-clover coverage.xml
         - bash <(curl -s https://codecov.io/bash)
+
+    - stage: Tests
+      php: 7.3
+      env: XDEBUG=false INSTALL_FFMPEG=yes REMOVE_QA=yes
+      script:
+        - ./vendor/bin/phpunit -v -c .travis/phpunit.xml --coverage-clover=coverage.xml
 
     - stage: Tests
       php: 7.2
