@@ -92,6 +92,7 @@ class ConvertDirCommand extends Command
 
         if ($input->getOption('output') !== null) {
             $outputDir = $input->getOption('output');
+            Assert::string($outputDir);
             Assert::directory($outputDir);
             Assert::writable($outputDir);
         } else {
